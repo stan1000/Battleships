@@ -2,6 +2,7 @@ Battleships
 ===========
 
 Goal: to find developers who would like to bring it to the next level. I can't continue investing any time since my focus in life has changed.
+
 1. I've started developing a bot for being able to play even when no other human players are connected to the server, but didn't get too far. Would love to see it become really sophisticated :)
 2. A port to Android would be brilliant; I've started to investigate but had to find how incompatible the Android UI classes are with AWT. Certainly an ambitious project!
 
