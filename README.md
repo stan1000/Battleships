@@ -57,8 +57,11 @@ The server also runs the web server if configured to. It's possible to issue com
 
 Supported commands:
 c - Print client list
+
 k - Kick player; usage: k <player name>
+
 h - Help
+
 x - Exit
 
 It's also possible to issue commands remotely from the chat input box of each client, provided this feature has been enabled in server.cfg and the user has logged in with the correct remote console password. Each command has to be prefixed with a /.
