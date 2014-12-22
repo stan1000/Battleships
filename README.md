@@ -56,22 +56,19 @@ When a client connects to the server it is assigned a random player name and pla
 The server also runs the web server if configured to. It's possible to issue commands in the local server console.
 
 Supported commands:
-c - Print client list
-
-k - Kick player; usage: k <player name>
-
-h - Help
-
-x - Exit
+- c - Print client list
+- k - Kick player; usage: k <player name>
+- h - Help
+- x - Exit
 
 It's also possible to issue commands remotely from the chat input box of each client, provided this feature has been enabled in server.cfg and the user has logged in with the correct remote console password. Each command has to be prefixed with a /.
  
 Supported commands:
-c - Print client list
-k - Kick player; usage: k <player name>
-l - Login; usage: l <Rcon Password>
-h - Help
-x - Exit/Logout
+- c - Print client list
+- k - Kick player; usage: k <player name>
+- l - Login; usage: l <Rcon Password>
+- h - Help
+- x - Exit/Logout
 Example: /l password
 
 Localization:
