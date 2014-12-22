@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<HTML>
+<HEAD>
+<TITLE>Battleships - Schiffe Versenken</TITLE>
+<link rel="stylesheet" type="text/css" href="res/style.css">
+<script type="text/javascript">
+function openAppletWindow() {
+	var sParm = location.search;
+	var sConfigFile = 'config.htm';
+	if (sParm.search('lng=de') > -1) {
+		sConfigFile = 'config-de.htm';
+	} else if (sParm.search('lng=en') > -1) {
+		sConfigFile = 'config-en.htm';
+	}
+	var oWnd = window.open('/resolve/' + sConfigFile, 'wndBattleShipsApplet', 'toolbar=no,location=no,resizable=yes,status=yes,width=645,height=500');
+	oWnd.focus();
+}
+</script>
+</HEAD>
+<BODY>
+<div id="BgTop">
+	<div id="Title"><h1>Battleships &ndash;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Schiffe Versenken</h1></div>
+	<div id="Link"><a href="http://www.stans-world.de/programming.html" target="_blank">Stan's World</a></div>
+</div>
+<div class="OpenApplet">
+	<br>
+	If no window opens, please click the button below.<br><br><br><br><input type="button" value="Play Now" class="OpenButton" onclick="openAppletWindow()" />
+</div>
+<div class="OpenApplet">
+	<br>
+	Falls sich kein Fenster &ouml;ffnet, bitte folgenden Knopf anklicken.<br><br><br><br><input type="button" value="Jetzt Spielen" class="OpenButton" onclick="openAppletWindow()" />
+</div>
+</BODY>
+</HTML>

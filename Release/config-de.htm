@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Schiffe Versenken</title>
+<script type="text/javascript" src="webres/helpers.js"></script>
+<link rel="stylesheet" type="text/css" href="webres/style.css" />
+</head>
+<body onload="startChange()">
+<applet
+	archive="BattleShips.jar"
+	code="BattleShipsApplet.java"
+	width="1600"
+	height="1200"
+	name="BattleShipsApplet">
+	
+	<param name="Port" value="443" />			<!-- Client TCP Port; für den Server wird nun server.cfg benutzt - 
+												beide Einstellungen müssen übereinstimmen, damit sich verbindende
+												Applets funktionieren -->
+
+	<!-- Einstellungen für die Applikation -->
+	<param name="PlaySound" value="1" />		<!-- Sound an/aus -->
+	<param name="RestoreWindow" value="1" />	<!-- Minimiertes Fenster bei Verbindungsaufbau wiederherstellen -->
+	<param name="StartServer" value="0" />	<!-- Server starten wenn Anwendung gestartet wird -->
+
+	<!-- Webserver Einstellungen -->
+	<!-- jetzt in server.cfg -->
+
+	<!-- Anzahl der Schiffe pro Schiffstyp -->
+	<!-- jetzt in server.cfg -->
+
+	<!-- Farbkonfiguration; Format: R,G,B (z.B.: 255,128,128) -->
+	<param name="ColorPlayField" value="215,240,255" />
+	<param name="ColorPlayFieldLines" value="default" />
+	<param name="ColorShip" value="40,110,210" />
+	<param name="ColorShipSunk" value="200,0,0" />
+	<param name="ColorShipHitMark" value="255,255,255" />
+	<param name="ColorShipHighlight" value="255,0,0" />
+	<param name="ColorPlayFieldShotMark" value="default" />
+	<param name="ColorPlayFieldShotMarkEnemy" value="default" />
+	<param name="ColorPlayFieldLastShotMark" value="default" />
+	
+	<!-- Sämtlicher Text -->
+	<param name="String_Title" value="Schiffe Versenken" />
+	<param name="String_BattleShipType1" value="Minensucher" />
+	<param name="String_BattleShipType2" value="Fregatte" />
+	<param name="String_BattleShipType3" value="U-Boot" />
+	<param name="String_BattleShipType4" value="Kreuzer" />
+	<param name="String_BattleShipType5" value="Schlachtschiff" />
+	<param name="String_BattleShipType6" value="Sternenzerstörer ;-)" />
+	<param name="String_MyShips" value="Meine Schiffe" />
+	<param name="String_EnemyShips" value="Gegnerische Schiffe" />
+	<param name="String_Ready" value="Bereit" />
+	<param name="String_Status" value="Status" />
+	<param name="String_Chat" value="Chat" />
+	<param name="String_Client" value="Client" />
+	<param name="String_Server" value="Server" />
+	<param name="String_Connect" value="Verbinden" />
+	<param name="String_Disconnect" value="Trennen" />
+	<param name="String_ServerStart" value="Starten" />
+	<param name="String_ServerStop" value="Anhalten" />
+	<param name="String_HideShips" value="Schiffe Verstecken" />
+	<param name="String_ShowShips" value="Schiffe Anzeigen" />
+	<param name="String_NewGame" value="Neues Spiel" />
+	<param name="String_ShipsIntersect" value="{0} überschneidet sich mit {1}. Bitte korrigieren." />
+	<param name="String_Shot" value="Schuss nach {0} : {1}" />
+	<param name="String_Hit" value="Treffer!" />
+	<param name="String_Sunk" value="Versenkt!" />
+	<param name="String_Won" value="DU HAST GEWONNEN!" />
+	<param name="String_Lost" value="DU HAST VERLOREN!" />
+	<param name="String_You" value="DU" />
+	<param name="String_Enemy" value="GEGNER" />
+	<param name="String_EnemyReady" value="Der Gegner ist bereit." />
+	<param name="String_YourTurn" value="Du bist dran." />
+	<param name="String_EnemyTurn" value="Der Gegner ist dran." />
+	<param name="String_Connected" value="Verbindung hergestellt." />
+	<param name="String_Disconnected" value="Verbindung getrennt." />
+	<param name="String_ServerStarted" value="Server gestartet." />
+	<param name="String_ServerStopped" value="Server angehalten." />
+	<param name="String_Error" value="Fehler:" />
+	<param name="String_UnknownHost" value="Server nicht gefunden." />
+	<param name="String_ServerPortInUse" value="Port {0} wird bereits verwendet. Bitte einen anderen wählen." />
+	<param name="String_ServerNotRunning" value="Der Server läuft nicht." />
+	<param name="String_RefreshPage" value="Hier klicken für erneuten Verbindungsaufbau." />
+	<param name="String_ConfigChange" value="Konfiguration geändert." />
+	<param name="String_VersionConflict" value="Versions Konflikt: der Server hat eine andere Anzahl von Schiffstypen." />
+	<param name="String_FieldTooSmall" value="Das Spielfeld ist zu klein für diese Anzahl von Schiffen. Bitte Spielfeld vergrößern oder Anzahl der Schiffe verringern." />
+	<param name="String_RestoreWindow" value="Fenster bei Verbindungsaufbau wiederherstellen" />
+	<param name="String_Connecting" value="Verbindungsaufbau ..." />
+	<param name="String_Waiting" value="Warte auf Gegner ..." />
+	<param name="String_EnemyFound" value="Mit Gegner verbunden." />
+	<param name="String_EnemyLeft" value="Der Gegner hat das Spiel verlassen." />
+	<param name="String_NewEnemy" value="Mit neuem Gegner verbunden." />
+	<param name="String_Host" value="Servername" />
+	<param name="String_PlayerName" value="Spielername" />
+	<param name="String_Set" value="Einstellen" />
+	<param name="String_PlayerNameSet" value="Spielername eingestellt" />
+	<param name="String_PlayerNameExists" value="Dieser Spielername wird schon verwendet." />
+	<param name="String_SelectEnemy" value="Gegner wählen:" />
+	<param name="String_Play" value="Spielen" />
+	<param name="String_EnemyShipsName" value="Schiffe von {0}" />
+	<param name="String_EnemyFoundName" value="Verbunden mit {0}." />
+	<param name="String_EnemyLeftName" value="{0} hat das Spiel verlassen." />
+	<param name="String_EnemyReadyName" value="{0} ist bereit." />
+	<param name="String_EnemyTurnName" value="{0} ist dran." />
+	<param name="String_EnemyLeftName" value="{0} hat das Spiel verlassen." />
+	<param name="String_ConfirmDisconnect" value="Du bist gerade in einem Spiel mit {0}. Bist du sicher dass du die Verbindung jetzt trennen willst?" />
+	<param name="String_Ok" value="OK" />
+	<param name="String_Cancel" value="Abbrechen" />
+	<param name="String_ServerStarting" value="Starte BattleShips Server V{0} auf Port {1}" />
+	<param name="String_ServerStopping" value="BattleShips Server wird angehalten" />
+	<param name="String_WebServerStarting" value="Starte Webserver auf Port {0}" />
+	<param name="String_Connected2" value="Verbunden:" />
+	<param name="String_Disconnected2" value="Getrennt:" />
+	<param name="String_ServerHelpMsg" value="Befehle:{0}{0}c - Client-Liste ausgeben{0}k - Spieler entfernen; Benutzung: k <Spielername>{0}h - Hilfe{0}x - Beenden" />
+	<param name="String_RemoteHelpMsg" value="Befehle:{0}{0}c - Client-Liste ausgeben{0}k - Spieler entfernen; Benutzung: k <Spielername>{0}l - Login; Benutzung: l <Passwort>{0}h - Hilfe{0}x - Ausloggen" />
+	<param name="String_AlreadyLoggedIn" value="Bereits eingeloggt." />
+	<param name="String_LoggedIn" value="Eingeloggt." />
+	<param name="String_WrongPassword" value="Falsches Passwort eingegeben." />
+	<param name="String_LoggedOut" value="Ausgeloggt." />
+	<param name="String_NotLoggedIn" value="Nicht eingeloggt." />
+	<param name="String_UnknownCommand" value="Unbekannter Befehl." />
+	<param name="String_NoClientsConnected" value="Keine Clients verbunden." />
+	<param name="String_ClientList" value="Client-Liste:" />
+	<param name="String_PlayerNameSet2" value="Spielername eingestellt:" />
+	<param name="String_ClientsConnected" value="Clients verbunden:" />
+	<param name="String_ClientsDisconnected" value="Clients getrennt:" />
+	<param name="String_NoSuchPlayer" value="Es ist kein Spieler mit diesem Namen verbunden." />
+	<param name="String_EnterPlayerName" value="Bitte Spielernamen eingeben." />
+</applet>
+</body>
+</html>
