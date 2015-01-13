@@ -22,7 +22,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class BattleShip extends Container {
+public class BattleShip extends Container implements MouseListener, MouseMotionListener {
 
 	private int m_iCellWidth;
 	private int m_iType;
@@ -107,9 +107,11 @@ public class BattleShip extends Container {
 		setSize(m_oDimOriginal);
 		setShape();
 		//**addMouseListener(new TheMouseAdapter((Object)this, "BattleShip"));
-		addMouseListener(new TheMouseAdapter((Object)this, "do"));
+		addMouseListener(this);
+		//addMouseListener(new TheMouseAdapter((Object)this, "do"));
 		//**addMouseMotionListener(new TheMouseMotionAdapter((Object)this, "BattleShip"));
-		addMouseMotionListener(new TheMouseMotionAdapter((Object)this, "for"));
+		addMouseMotionListener(this);
+		//addMouseMotionListener(new TheMouseMotionAdapter((Object)this, "for"));
 	}
 	
 	public void setColorSunk(Color oColor) {
@@ -550,8 +552,9 @@ public class BattleShip extends Container {
 		//System.out.println("Finished painting of ship " + m_iType);
 	}
 	
-	//**public void BattleShip_MouseEntered (MouseEvent event)
-	public void do_oh(MouseEvent event) {
+	//**public void BattleShip_MouseEntered(MouseEvent event)
+	//public void do_oh(MouseEvent event) {
+	public void mouseEntered(MouseEvent event) {
 		if (!m_bEnemyShip && !m_bLocked) {
 			m_bHighlight = true;
 			repaint();
@@ -559,7 +562,8 @@ public class BattleShip extends Container {
 	}
 
 	//**public void BattleShip_MouseExited(MouseEvent event) {
-	public void do_od(MouseEvent event) {
+	//public void do_od(MouseEvent event) {
+	public void mouseExited(MouseEvent event) {
 		if (!m_bEnemyShip && !m_bLocked) {
 			m_bHighlight = false;
 			repaint();
@@ -567,7 +571,8 @@ public class BattleShip extends Container {
 	}
 
 	//**public void BattleShip_MouseClicked(MouseEvent event) {
-	public void do_ou(MouseEvent event) {
+	//public void do_ou(MouseEvent event) {
+	public void mouseClicked(MouseEvent event) {
 		if (event.getModifiers() == 4) {
 			if (!m_bLocked) {
 				Rectangle oReBounds = getBounds();
@@ -591,20 +596,27 @@ public class BattleShip extends Container {
 	}
 
 	//**public void BattleShip_MousePressed(MouseEvent event) {
-	public void do_oi(MouseEvent event) {
+	//public void do_oi(MouseEvent event) {
+	public void mousePressed(MouseEvent event) {
 		if (event.getModifiers() == 16) {
 			if (!m_bLocked) {
 				m_oPntMousePos.x = event.getX();
 				m_oPntMousePos.y = event.getY();
-				m_oPlParent.remove(this);
-				m_oPlParent.add(this, 0);
-				repaint();
+				// Remark:
+				// Had to disable remove/add ship due to bug: https://bugs.openjdk.java.net/browse/JDK-8061636
+				// Ship drag/click behaviour slightly changes, but at least the game is playable again ...
+				//m_oPlParent.remove(this);
+				//m_oPlParent.add(this, 0);
+				//repaint();
 			}
 		}
 	}
+
+	public void mouseReleased(MouseEvent event) {}
 	
 	//**public void BattleShip_MouseDragged(MouseEvent event) {
-	public void for_ti(MouseEvent event) {
+	//public void for_ti(MouseEvent event) {
+	public void mouseDragged(MouseEvent event) {
 		if (event.getModifiers() == 16 || event.getModifiers() == 0) {
 			if (!m_bLocked) {
 				Rectangle oReBounds = getBounds();
@@ -627,6 +639,8 @@ public class BattleShip extends Container {
 			}
 		}
 	}
+	
+	public void mouseMoved(MouseEvent event) {}
 	
 	private void paintShipSegments(Graphics g) {
 		Point oPoint = null;

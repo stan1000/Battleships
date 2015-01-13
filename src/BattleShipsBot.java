@@ -43,21 +43,21 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 	public BattleShipsBot(String[] args) {
 		String playerName;
 		String isVisible;
-		isVisible = (args.length > 0 ? args[0] : "true");
-		playerName = (args.length > 1 ? args[1] : DEFAULT_PLAYER_NAME);
-		m_serverName = (args.length > 2 ? args[2] : DEFAULT_SERVER);
+		m_serverName = (args.length > 0 ? args[0] : DEFAULT_SERVER);
+		isVisible = (args.length > 1 ? args[1] : "true");
+		playerName = (args.length > 2 ? args[2] : DEFAULT_PLAYER_NAME);
 		m_oUtil = new BattleShipsUtility();
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
-			setLayout(null);
-			setResizable(false);
-			setTitle(playerName);
-			enableEvents(AWTEvent.WINDOW_EVENT_MASK);
-			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(true));
 			if (isVisible.equals("true")) {
+				setLayout(null);
+				setResizable(false);
+				setTitle(playerName);
+				enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 				setVisible(true);
 				setSize(640, 480);
 			}
+			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(true));
 			m_oBtlShips.setIsBot(true);
 			m_oBtlShips.init();
 			m_oBtlShips.setPlayerName(playerName);
