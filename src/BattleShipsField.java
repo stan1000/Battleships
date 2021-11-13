@@ -44,6 +44,8 @@ public class BattleShipsField extends Container {
 	private Image m_oImgShipSegmentSunk;
 	private boolean m_bPainting;
 	private Cursor m_bShootCursor;
+	private BattleShip m_bsPatternSubmarine;
+	private BattleShip m_bsPatternBattleship;
 	
 	public static final int FIELD_TYPE_ME = 1;
 	public static final int FIELD_TYPE_ENEMY = 2;
@@ -309,6 +311,17 @@ public class BattleShipsField extends Container {
 		}
 	}
 	
+	public void addTestShips() {
+		m_bsPatternSubmarine = addShip(new BattleShip(4, 3, true));
+		m_bsPatternSubmarine.setForeground(m_oColShip);
+		m_bsPatternSubmarine.setPosition(1, 1);
+		m_bsPatternSubmarine.setDirection(1);
+		m_bsPatternBattleship = addShip(new BattleShip(4, 5, true));
+		m_bsPatternBattleship.setForeground(m_oColShip);
+		m_bsPatternBattleship.setPosition(4, 1);
+		m_bsPatternBattleship.setDirection(1);
+	}
+	
 	public void setShipTypeCount(int iType, int iCount) {
 		m_iShipTypeCount[iType - 1] = iCount;
 	}
@@ -541,6 +554,14 @@ public class BattleShipsField extends Container {
 			oBattleShip = (BattleShip)oEnum.nextElement();
 			if (!oBattleShip.getSunk()) oBattleShip.setVisible(bVisible);
 		}
+	}
+	
+	public BattleShip getPatternSubmarine() {
+		return m_bsPatternSubmarine;
+	}
+	
+	public BattleShip getPatternBattleship() {
+		return m_bsPatternBattleship;
 	}
 	
 	//**public void BattleShipsField_MouseClicked(MouseEvent event) {

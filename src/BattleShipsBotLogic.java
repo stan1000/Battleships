@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import java.awt.*;
 import java.util.*;
 
-public class BattleShipsBotAI {
+public class BattleShipsBotLogic {
 		
 	private int m_fieldWidth;
 	private Vector<Point> m_totalShotPoints;
@@ -30,14 +30,20 @@ public class BattleShipsBotAI {
 	private Vector<Point> m_rowShotPoints;
 	private Point m_firstPoint;
 	private Point m_lastHitPoint;
+	private BattleShipsField m_plTestShips;
+	private Vector<Vector<Point>> m_firingSolutions;
+	private Vector<Point> m_lastFiringSolution;
 		
-	public BattleShipsBotAI(int fieldWidth) {
+	public BattleShipsBotLogic(int fieldWidth, BattleShipsField testShips) {
 		m_totalShotPoints = new Vector<Point>();
 		m_hitPoints = new Vector<Point>();
 		m_nextShotPoints = new Vector<Point>();
 		m_rowShotPoints = new Vector<Point>();
 		m_fieldWidth = fieldWidth;
 		m_firstPoint = new Point(4, 6);
+		m_plTestShips = testShips;
+		m_firingSolutions = new Vector<Vector<Point>>();
+		m_lastFiringSolution = new Vector<Point>();
 		fillTotalShotPoints();
 	}
 	
@@ -53,7 +59,7 @@ public class BattleShipsBotAI {
 			m_totalShotPoints.removeElement(pnt);
 			System.out.println("El count after 1: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else if (size2 > 0) {
-			index = (int)Math.round(Math.random() * (m_nextShotPoints.size() - 1));
+			index = (int)Math.round(Math.random() * (size2 - 1));
 			pnt = m_nextShotPoints.elementAt(index);
 			m_nextShotPoints.removeElementAt(index);
 			m_totalShotPoints.removeElement(pnt);
@@ -77,6 +83,9 @@ public class BattleShipsBotAI {
 		int size;
 		int i, j;
 		Point pnt, pnt1, pnt2;
+		BattleShip shipPattern;
+		boolean pointAdded = false;
+		
 		if (sunk) {
 			System.out.println("fieldHits.size(): " + fieldHits.size());
 			for (i = 0; i < fieldHits.size(); i++) {
@@ -93,6 +102,8 @@ public class BattleShipsBotAI {
 			if (size > 0) {
 				m_rowShotPoints.removeAllElements();
 				m_nextShotPoints.removeAllElements();
+				m_firingSolutions.removeAllElements();
+				m_lastFiringSolution.removeAllElements();
 				for (i = 0; i < size; i++) {
 					pnt = m_hitPoints.elementAt(i);
 					System.out.println("next shot point: " + pnt.toString());
@@ -104,8 +115,11 @@ public class BattleShipsBotAI {
 		if (sunk && m_hitPoints.size() == 0) {
 			m_rowShotPoints.removeAllElements();
 			m_nextShotPoints.removeAllElements();
+			m_firingSolutions.removeAllElements();
+			m_lastFiringSolution.removeAllElements();
 			m_lastHitPoint = null;
 		} else {
+			System.out.println("hit: " + (hit ? "true" : "false") + " - m_lastHitPoint: " + (m_lastHitPoint != null ? m_lastHitPoint.toString() : "null"));
 			if (hit || m_lastHitPoint != null) {
 				if (hit) {
 					if (!sunk) {
@@ -114,6 +128,11 @@ public class BattleShipsBotAI {
 						for (i = 0; i < m_hitPoints.size(); i++) {
 							pnt = m_hitPoints.elementAt(i);
 							System.out.println("hit point after add: " + pnt.toString());
+						}
+						if (m_lastFiringSolution.contains(m_lastHitPoint) && m_rowShotPoints.size() == 0) {
+							System.out.println("Looking for special ships (1): Battleship");
+							m_firingSolutions.removeAllElements();
+							manageFiringSolutions(m_plTestShips.getPatternBattleship());
 						}
 					}
 				} else {
@@ -151,9 +170,9 @@ public class BattleShipsBotAI {
 							}
 							for (i = pnt1.y; i <= pnt2.y; i++) {
 								pnt = new Point(pnt1.x, i);
-								addRowShotPoint(pnt);
+								pointAdded = addRowShotPoint(pnt);
 							}
-							System.out.println("size > 1 (x): pass2 - " + pnt1.toString() + " - " + pnt2.toString());
+							System.out.println("size > 1 (x): pass 1 - " + pnt1.toString() + " - " + pnt2.toString());
 						} else if (pnt1.y == pnt2.y) {
 							if (pnt1.x > 0) {
 								pnt1 = new Point(pnt1.x - 1, pnt1.y);
@@ -163,9 +182,9 @@ public class BattleShipsBotAI {
 							}
 							for (i = pnt1.x; i <= pnt2.x; i++) {
 								pnt = new Point(i, pnt1.y);
-								addRowShotPoint(pnt);
+								pointAdded = addRowShotPoint(pnt);
 							}
-							System.out.println("size > 1 (y): pass2 - " + pnt1.toString() + " - " + pnt2.toString());
+							System.out.println("size > 1 (y): pass 2 - " + pnt1.toString() + " - " + pnt2.toString());
 						} else if (pnt1.y - pnt2.y == pnt1.x - pnt2.x) {
 							if (pnt1.x > 0 && pnt1.y > 0) {
 								pnt1 = new Point(pnt1.x - 1, pnt1.y - 1);
@@ -176,10 +195,10 @@ public class BattleShipsBotAI {
 							j = 0;
 							for (i = pnt1.x; i <= pnt2.x; i++) {
 								pnt = new Point(i, pnt1.y + j);
-								addRowShotPoint(pnt);
+								pointAdded = addRowShotPoint(pnt);
 								j++;
 							}
-							System.out.println("size > 1 (diag): pass2 - " + pnt1.toString() + " - " + pnt2.toString());
+							System.out.println("size > 1 (diagonal): pass 1 - " + pnt1.toString() + " - " + pnt2.toString());
 						} else if (pnt1.x + pnt1.y == pnt2.x + pnt2.y) {
 							if (pnt1.x > 0 && pnt1.y < m_fieldWidth - 1) {
 								pnt1 = new Point(pnt1.x - 1, pnt1.y + 1);
@@ -190,14 +209,26 @@ public class BattleShipsBotAI {
 							j = 0;
 							for (i = pnt1.x; i <= pnt2.x; i++) {
 								pnt = new Point(i, pnt1.y - j);
-								addRowShotPoint(pnt);
+								pointAdded = addRowShotPoint(pnt);
 								j++;
 							}
-							System.out.println("size > 1 (diag2): pass2 - " + pnt1.toString() + " - " + pnt2.toString());
+							System.out.println("size > 1 (diagonal): pass 2 - " + pnt1.toString() + " - " + pnt2.toString());
+						}
+						if (!pointAdded) {
+							System.out.println("Looking for special ships (1): Submarine");
+							manageFiringSolutions(m_plTestShips.getPatternSubmarine());
 						}
 					}
 				}
 			} else {
+				System.out.println("Hitpoints: " + m_hitPoints.size());
+				if (m_hitPoints.size() > 3) {
+					System.out.println("Looking for special ships (2): Battleship");
+					manageFiringSolutions(m_plTestShips.getPatternBattleship());
+				} else if (m_hitPoints.size() > 1) {
+					System.out.println("Looking for special ships (2): Submarine");
+					manageFiringSolutions(m_plTestShips.getPatternSubmarine());
+				}
 				//m_lastHitPoint = null;
 				//m_rowShotPoints.removeAllElements();
 			}
@@ -206,10 +237,86 @@ public class BattleShipsBotAI {
 		//System.out.println("Shot result: " + shot.x + " - " + shot.y + " - " + hit + " - " + sunk);
 	}
 	
-	private void addRowShotPoint(Point pnt) {
+	private void manageFiringSolutions(BattleShip shipPattern) {
+		if (m_firingSolutions.size() > 0) {
+			getNextFiringSolution();
+		} else {
+			calculateFiringSolutions(shipPattern);
+			if (m_firingSolutions.size() > 0) {
+				getNextFiringSolution();
+			}
+		}
+	}
+	
+	private void getNextFiringSolution() {
+		Vector<Point> firingSolution;
+		int i;
+		Point pnt;
+		
+		m_rowShotPoints.removeAllElements();
+		firingSolution = m_firingSolutions.remove(0);
+		m_lastFiringSolution = firingSolution;
+		for (i = 0; i < firingSolution.size(); i++) {
+			pnt = firingSolution.elementAt(i);
+			addRowShotPoint(pnt);
+		}
+	}
+	
+	private void calculateFiringSolutions(BattleShip shipPattern) {
+		int i, j, k, l;
+		Point pnt;
+		Vector<Point> surroundingFields = new Vector<Point>();
+		Vector<Point> possibleHitpoints;
+		boolean isSubset;
+
+		for (i = 0; i < m_hitPoints.size(); i++) {
+			pnt = m_hitPoints.elementAt(i);
+			fillNextShotPoints(pnt, surroundingFields, true, true);
+			for (j = 0; j < surroundingFields.size(); j++) {
+				pnt = surroundingFields.elementAt(j);
+				shipPattern.setPosition(pnt.x, pnt.y);
+				for (k = 1; k <= 4; k++) {
+					shipPattern.setDirection(k);
+					possibleHitpoints = shipPattern.getPossibleHitpoints();
+					//System.out.println("Possible firing solution: " + possibleHitpoints.toString() + " - current hitpoints: " + m_hitPoints.toString());
+					isSubset = true;
+					for (l = 0; l < m_hitPoints.size(); l++) {
+						pnt = m_hitPoints.elementAt(l);
+						if (!possibleHitpoints.contains(pnt)) {
+							isSubset = false;
+							break;
+						}
+						possibleHitpoints.removeElement(pnt);
+					}
+					if (isSubset) {
+						for (l = 0; l < possibleHitpoints.size(); l++) {
+							if (!m_totalShotPoints.contains(possibleHitpoints.elementAt(l))) {
+								isSubset = false;
+								break;
+							}
+						}
+						if (isSubset) {
+							if (!m_firingSolutions.contains(possibleHitpoints)) {
+								m_firingSolutions.addElement(possibleHitpoints);
+								System.out.println("Added firing solution: " + possibleHitpoints.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
+							}
+						}
+					}
+				}
+			}
+			surroundingFields.removeAllElements();
+		}
+		
+	}
+	
+	private boolean addRowShotPoint(Point pnt) {
+		boolean pointAdded = false;
+
 		if (m_totalShotPoints.contains(pnt)) {
 			m_rowShotPoints.addElement(pnt);
+			pointAdded = true;
 		}
+		return pointAdded;
 	}
 	
 	private Point getHigherPoint(Point pnt) {
@@ -250,8 +357,12 @@ public class BattleShipsBotAI {
 			}
 		}
 	}
-	
+
 	private void fillNextShotPoints(Point shot, Vector<Point> nextShotPoints) {
+		fillNextShotPoints(shot, nextShotPoints, false, false);
+	}
+	
+	private void fillNextShotPoints(Point shot, Vector<Point> nextShotPoints, boolean addSourcePoint, boolean ignoreSpentShots) {
 		int startX, startY, endX, endY;
 		int x, y, i;
 		Point pnt;
@@ -263,10 +374,15 @@ public class BattleShipsBotAI {
 		else startY = shot.y - 1;
 		if (shot.y == m_fieldWidth - 1) endY = m_fieldWidth - 1;
 		else endY = shot.y + 1;
+		if (addSourcePoint) {
+			if (ignoreSpentShots || m_totalShotPoints.contains(shot) && !nextShotPoints.contains(shot)) {
+				nextShotPoints.addElement(shot);
+			}
+		}
 		for (x = startX; x <= endX; x++) {
 			for (y = startY; y <= endY; y++) {
 				pnt = new Point(x, y);
-				if (m_totalShotPoints.contains(pnt) && !nextShotPoints.contains(pnt)) {
+				if (ignoreSpentShots || m_totalShotPoints.contains(pnt) && !nextShotPoints.contains(pnt)) {
 					nextShotPoints.addElement(pnt);
 				}
 			}

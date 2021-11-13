@@ -533,6 +533,20 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		return m_iMaxShipArea;
 	}
 	
+	public Vector<Point> getPossibleHitpoints() {
+		int x, y, i;
+		Point tmp;
+		int offset = Math.round(m_iCellWidth / 2);
+		Vector<Point> posHitPoints = new Vector<Point>();
+		for (i = 0; i < m_oVcCheckPoint.size(); i++) {
+			tmp = m_oVcCheckPoint.elementAt(i);
+			x = (tmp.x - offset) / m_iCellWidth + m_oPntPos.x;
+			y = (tmp.y - offset) / m_iCellWidth + m_oPntPos.y;
+			posHitPoints.addElement(new Point(x, y));
+		}
+		return posHitPoints;
+	}
+	
 	public void paint(Graphics g) {
 		if (g == null) return;
 		//System.out.println("Starting painting of ship " + m_iType);

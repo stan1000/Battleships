@@ -38,6 +38,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private BattleShipsField m_oPlMyScore;
 	private BattleShipsField m_oPlEnemyScore;
 	private BattleShipsField m_oPlInfo;
+	private BattleShipsField m_plTestShips;
 	private TextDisplayPanel m_oTxtStatus;
 	private TextField m_oTxtChatInput;
 	private TextArea m_oTxtChatOutput;
@@ -113,7 +114,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private TextDisplayPanel m_cntModalMask;
 	private boolean m_connectToFirstPlayer;
 	private boolean m_isBot;
-	private BattleShipsBotAI m_Ai;
+	private BattleShipsBotLogic m_Ai;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -339,6 +340,15 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlEnemyScore.setColorShip(m_oColShip);
 		m_oPlEnemyScore.setColorShipSunk(m_oColShipSunk);
 		m_oPlEnemyScore.init(3, 68);
+		
+		if (m_isBot) {
+			m_plTestShips = (BattleShipsField)m_oCntMain.add(new BattleShipsField(BattleShipsUtility.MAX_SHIP_TYPE, BattleShipsField.FIELD_TYPE_ME));
+			m_plTestShips.setBackground(oColField);
+			m_plTestShips.setForeground(oColFieldLines);
+			m_plTestShips.setColorShip(m_oColShip);
+			m_plTestShips.setColorShipSunk(m_oColShipSunk);
+			m_plTestShips.setVisible(false);
+		}
 		
 		//**m_oBtnReady = (GfxAnimatedButton)m_oCntMain.add(new GfxAnimatedButton((Object)this, "BtnReady", oImgBtnOn, oImgBtnOff));
 		m_oBtnReady = (GfxAnimatedButton)m_oCntMain.add(new GfxAnimatedButton((Object)this, "n", oImgBtnOn, oImgBtnOff));
@@ -579,7 +589,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		}
 		m_oPlMyScore.addAllMyShips();
 		m_oPlEnemyScore.addAllMyShips();
-
+		
+		m_plTestShips.removeAllShips();
+		m_plTestShips.init(4, m_iFieldWidth);
+		m_plTestShips.addTestShips();
+		
 		iFieldDim = m_oPlMyShips.getSize().width;
 		if (iFieldDim < 230) iFieldDim = 230;
 		iHeight = iFieldDim + VERT_BORDER_PADDING + 226;
@@ -920,7 +934,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			reset();
 			setStatus(getString("NewGame"));
 			if (m_isBot) {
-				m_Ai = new BattleShipsBotAI(m_iFieldWidth);
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
 				m_oPlMyShips.setShipsRandomPosition(false);
 			}
 		} else if (sMessage.equals("chat")) {
@@ -1058,7 +1072,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		setScoreBounds();
 		if (m_bPlaySound) playAudioClip(m_oAuConnect);
 		if (m_isBot) {
-			m_Ai = new BattleShipsBotAI(m_iFieldWidth);
+			m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
 			m_oPlMyShips.setShipsRandomPosition(false);
 		}
 	}
