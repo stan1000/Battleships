@@ -590,9 +590,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlMyScore.addAllMyShips();
 		m_oPlEnemyScore.addAllMyShips();
 		
-		m_plTestShips.removeAllShips();
-		m_plTestShips.init(4, m_iFieldWidth);
-		m_plTestShips.addTestShips();
+		if (m_isBot) {
+			m_plTestShips.removeAllShips();
+			m_plTestShips.init(4, m_iFieldWidth);
+			m_plTestShips.addTestShips();
+		}
 		
 		iFieldDim = m_oPlMyShips.getSize().width;
 		if (iFieldDim < 230) iFieldDim = 230;
@@ -1071,10 +1073,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		setScore();
 		setScoreBounds();
 		if (m_bPlaySound) playAudioClip(m_oAuConnect);
-		if (m_isBot) {
-			m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
-			m_oPlMyShips.setShipsRandomPosition(false);
-		}
 	}
 	
 	private void toggleSelectEnemy(boolean visible) {
@@ -1238,6 +1236,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			reset();
 			setStatus(getString("NewGame"));
 		} else {
+			if (m_isBot) {
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
+				m_oPlMyShips.setShipsRandomPosition(false);
+			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
 			if (oPntShips != null) {
 				String sStatus = MessageFormat.format(getString("ShipsIntersect"),

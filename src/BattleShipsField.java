@@ -50,6 +50,7 @@ public class BattleShipsField extends Container {
 	public static final int FIELD_TYPE_ME = 1;
 	public static final int FIELD_TYPE_ENEMY = 2;
 	public static final int FIELD_TYPE_SCORE = 3;
+	private static final boolean DEBUG = true;
 
 	public BattleShipsField(int iMaxShipType, int iFieldType) {
 		m_iMaxShipType = iMaxShipType;
@@ -80,6 +81,16 @@ public class BattleShipsField extends Container {
 		if (g == null) return;
 		g.setColor(oColor);
 		g.fillRect(oPoint.x * m_iCellWidth + 1, oPoint.y * m_iCellWidth + 1, m_iCellWidth - 1, m_iCellWidth - 1);
+		if (DEBUG) {
+			if (oPoint.x == 0) {
+				g.setColor(getForeground());
+				g.drawString(String.valueOf(oPoint.y), 2, oPoint.y * m_iCellWidth + Math.round(m_iCellWidth / 2) + 5);
+			}
+			if (oPoint.y == 0 && oPoint.x > 0) {
+				g.setColor(getForeground());
+				g.drawString(String.valueOf(oPoint.x), oPoint.x * m_iCellWidth + Math.round(m_iCellWidth / 2) - 6, m_iCellWidth - 3);
+			}
+		}
 	}
 
 	public void setColorShip(Color oColor) {
@@ -135,12 +146,11 @@ public class BattleShipsField extends Container {
 		g.setColor(getForeground());
 		g.drawRect(0, 0, oReDim.width - 1, oReDim.height - 1);
 		if (m_iFieldType != FIELD_TYPE_SCORE) {
-			iNumLines = Math.round(oReDim.width / m_iCellWidth) - 1;
+			iNumLines = m_iFieldWidth - 1;
 			iLength = getBounds().height;
 			for (i = 1; i <= iNumLines; i++) {
 				g.drawLine(i * m_iCellWidth, 0, i * m_iCellWidth, iLength - 1);
 			}
-			iNumLines = Math.round(oReDim.height / m_iCellWidth) - 1;
 			iLength = getBounds().width;
 			for (i = 1; i <= iNumLines; i++) {
 				g.drawLine(0, i * m_iCellWidth, iLength - 1, i * m_iCellWidth);
@@ -155,6 +165,20 @@ public class BattleShipsField extends Container {
 					oColShotMark = m_oColLastShotMark;
 				}
 				paintShot(g, oPoint, oColShotMark);
+			}
+			if (DEBUG) {
+				g.setColor(getForeground());
+				for (i = 1; i <= iNumLines; i++) {
+					g.drawString(String.valueOf(i - 1), 2, i * m_iCellWidth - Math.round(m_iCellWidth / 2) + 5);
+				}
+				g.drawString(String.valueOf(i - 1), 2, i * m_iCellWidth - Math.round(m_iCellWidth / 2) + 5);
+				iLength = getBounds().width;
+				for (i = 1; i <= iNumLines; i++) {
+					if (i > 1) {
+						g.drawString(String.valueOf(i - 1), i * m_iCellWidth - Math.round(m_iCellWidth / 2) - 6, m_iCellWidth - 3);
+					}
+				}
+				g.drawString(String.valueOf(i - 1), i * m_iCellWidth - Math.round(m_iCellWidth / 2) - 6, m_iCellWidth - 3);
 			}
 		}
 		m_bPainting = false;
