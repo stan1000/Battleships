@@ -40,13 +40,16 @@ public class BattleShipsBotLogic {
 		m_nextShotPoints = new Vector<Point>();
 		m_rowShotPoints = new Vector<Point>();
 		m_fieldWidth = fieldWidth;
-		//m_firstPoint = new Point(4, 6);
+		//m_firstPoint = new Point(8, 11);
 		m_plTestShips = testShips;
 		m_firingSolutions = new Vector<Vector<Point>>();
 		m_lastFiringSolution = new Vector<Point>();
 		fillTotalShotPoints();
-		addRowShotPoint(new Point(2, 16));
-		addRowShotPoint(new Point(1, 17));
+		/*addRowShotPoint(new Point(12, 8));
+		addRowShotPoint(new Point(13, 8));
+		addRowShotPoint(new Point(6, 4));
+		addRowShotPoint(new Point(6, 5));
+		addRowShotPoint(new Point(6, 6));*/
 	}
 	
 	public Point getNextShot() {
@@ -141,10 +144,11 @@ public class BattleShipsBotLogic {
 					if (m_hitPoints.size() >= 3) {
 						m_firingSolutions.removeAllElements();
 					}
-					if (m_hitPoints.size() > 1 && m_hitPoints.size() <=3) {
+					if (m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
 						System.out.println("Looking for special ships (1): Submarine");
 						manageFiringSolutions(m_plTestShips.getPatternSubmarine());
-					} else {
+					}
+					if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
 						System.out.println("Looking for special ships (1): Battleship");
 						manageFiringSolutions(m_plTestShips.getPatternBattleship());
 					}
@@ -240,28 +244,30 @@ public class BattleShipsBotLogic {
 							System.out.println("size > 1 (diagonal): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						}
 						if (!pointAdded) {
-							System.out.println("Looking for special ships (1.1): Submarine");
-							manageFiringSolutions(m_plTestShips.getPatternSubmarine());
+							if (m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
+								System.out.println("Looking for special ships (1.1): Submarine");
+								manageFiringSolutions(m_plTestShips.getPatternSubmarine());
+							}
+							if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
+								System.out.println("Looking for special ships (1.1): Battleship");
+								manageFiringSolutions(m_plTestShips.getPatternBattleship());
+							}
 						}
 					}
 				}
 			} else {
-
 				System.out.println("Hitpoints: " + m_hitPoints.size());
-				if (!sunk && m_lastFiringSolution.contains(shot) && m_rowShotPoints.size() == 0) {
-					if (m_hitPoints.size() >= 3) {
-						m_firingSolutions.removeAllElements();
-					}
-					if (m_hitPoints.size() > 1 && m_hitPoints.size() <=3) {
-						System.out.println("Looking for special ships (2): Submarine");
-						manageFiringSolutions(m_plTestShips.getPatternSubmarine());
-					}
-					if (m_rowShotPoints.size() == 0) {
-						System.out.println("Looking for special ships (2): Battleship");
-						manageFiringSolutions(m_plTestShips.getPatternBattleship());
-					}
+				if (m_hitPoints.size() >= 3) {
+					m_firingSolutions.removeAllElements();
 				}
-
+				if (m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
+					System.out.println("Looking for special ships (2): Submarine");
+					manageFiringSolutions(m_plTestShips.getPatternSubmarine());
+				}
+				if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
+					System.out.println("Looking for special ships (2): Battleship");
+					manageFiringSolutions(m_plTestShips.getPatternBattleship());
+				}
 				//m_lastHitPoint = null;
 				//m_rowShotPoints.removeAllElements();
 			}
