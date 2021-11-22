@@ -936,7 +936,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			reset();
 			setStatus(getString("NewGame"));
 			if (m_isBot) {
-				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
 				m_oPlMyShips.setShipsRandomPosition(false);
 			}
 		} else if (sMessage.equals("chat")) {
@@ -1237,7 +1237,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			setStatus(getString("NewGame"));
 		} else {
 			if (m_isBot) {
-				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips);
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
 				m_oPlMyShips.setShipsRandomPosition(false);
 			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
