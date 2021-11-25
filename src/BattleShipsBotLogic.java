@@ -30,6 +30,7 @@ public class BattleShipsBotLogic {
 	private Vector<Point> m_rowShotPoints;
 	private Point m_firstPoint;
 	private Point m_lastHitPoint;
+	private Point m_lastShot;
 	private BattleShipsField m_plTestShips;
 	private Vector<Vector<Point>> m_firingSolutions;
 	private Vector<Point> m_lastFiringSolution;
@@ -41,17 +42,20 @@ public class BattleShipsBotLogic {
 		m_nextShotPoints = new Vector<Point>();
 		m_rowShotPoints = new Vector<Point>();
 		m_fieldWidth = fieldWidth;
-		m_firstPoint = new Point(6, 6);
+		//m_firstPoint = new Point(6, 6);
 		m_plTestShips = testShips;
 		m_plEnemyScore = enemyScore;
 		m_firingSolutions = new Vector<Vector<Point>>();
 		m_lastFiringSolution = new Vector<Point>();
 		fillTotalShotPoints();
-		/*addRowShotPoint(new Point(12, 8));
-		addRowShotPoint(new Point(13, 8));
-		addRowShotPoint(new Point(6, 4));
-		addRowShotPoint(new Point(6, 5));
-		addRowShotPoint(new Point(6, 6));*/
+		/*addRowShotPoint(new Point(12, 9));
+		addRowShotPoint(new Point(10, 10));
+		addRowShotPoint(new Point(9, 10));
+		addRowShotPoint(new Point(13, 11));
+		addRowShotPoint(new Point(9, 11));
+		addRowShotPoint(new Point(11, 12));
+		addRowShotPoint(new Point(12, 10));
+		addRowShotPoint(new Point(11, 10));*/
 	}
 	
 	public Point getNextShot() {
@@ -126,10 +130,10 @@ public class BattleShipsBotLogic {
 			m_firingSolutions.removeAllElements();
 			m_lastFiringSolution.removeAllElements();
 			m_lastHitPoint = null;
-			System.out.println("Battleships left: " + m_plEnemyScore.hasActiveShips(5) + "");
 		} else {
 			System.out.println("hit: " + (hit ? "true" : "false") + " - m_lastHitPoint: " + (m_lastHitPoint != null ? m_lastHitPoint.toString() : "null"));
 			if (hit || m_lastHitPoint != null) {
+				m_lastShot = shot;
 				if (hit) {
 					if (!sunk) {
 						m_lastHitPoint = shot;
@@ -143,17 +147,24 @@ public class BattleShipsBotLogic {
 					shot = m_lastHitPoint;
 					m_lastHitPoint = null;
 				}
-				if (!sunk && !hit && m_lastFiringSolution.contains(shot)) {
-					if (m_hitPoints.size() >= 3) {
+				if (!sunk) {
+					if (m_lastFiringSolution.contains(shot) && hit && m_rowShotPoints.size() == 0) {
+						System.out.println("Looking for special ships (1-after sub): Battleship");
 						m_firingSolutions.removeAllElements();
+						manageFiringSolutions(5);
+					} else if (m_lastFiringSolution.contains(m_lastShot) && (!hit || m_rowShotPoints.size() == 0)) {
+						if (!hit) {
+							m_rowShotPoints.removeAllElements();
+						}
+						if (m_hitPoints.size() >= 3) {
+							m_firingSolutions.removeAllElements();
+						}
+						applyFiringSolutionLogic("1");
 					}
-					applyFiringSolutionLogic("1");
 				}
-				// TODO: find/get new solution right away when previous fails; see screenshots
 				if (m_rowShotPoints.size() == 0) {
-					//m_nextShotPoints.removeAllElements();
-					//if (m_nextShotPoints.size() == 0)
 					if (!sunk) {
+						//TODO: test if this logic is still necessary
 						System.out.println("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size());
 						if (!hit && m_lastFiringSolution.contains(shot)) {
 							if (m_plEnemyScore.hasActiveShips(3) && m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
@@ -173,7 +184,6 @@ public class BattleShipsBotLogic {
 					size = m_hitPoints.size();
 					if (size > 1) {
 						System.out.println("size > 1");
-						//m_rowShotPoints.removeAllElements();
 						pnt1 = m_hitPoints.elementAt(0);
 						pnt2 = m_hitPoints.elementAt(size - 1);
 						System.out.println("size > 1: pass1 - " + pnt1.toString() + " - " + pnt2.toString());
@@ -242,7 +252,7 @@ public class BattleShipsBotLogic {
 							System.out.println("size > 1 (diagonal): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						}
 						if (!pointAdded) {
-							applyFiringSolutionLogic("1");
+							applyFiringSolutionLogic("2");
 						}
 					}
 				}
@@ -252,7 +262,7 @@ public class BattleShipsBotLogic {
 					if (m_hitPoints.size() >= 3) {
 						m_firingSolutions.removeAllElements();
 					}
-					applyFiringSolutionLogic("2");
+					applyFiringSolutionLogic("3");
 				}
 				//m_lastHitPoint = null;
 				//m_rowShotPoints.removeAllElements();
@@ -272,6 +282,7 @@ public class BattleShipsBotLogic {
 				manageFiringSolutions(5);
 			}
 		}
+		System.out.println("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size() + " - m_rowShotPoints.size(): " + m_rowShotPoints.size());
 		if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
 			System.out.println("Looking for special ships (" + debugMarker + "): Battleship");
 			manageFiringSolutions(5);
