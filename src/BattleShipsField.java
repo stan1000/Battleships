@@ -302,7 +302,7 @@ public class BattleShipsField extends Container {
 			if (iMaxShipAreaSum > Math.pow(m_iFieldWidth * m_iCellWidth, 2)) {
 				bRet = false;
 			} else {
-				setShipsRandomPosition(true);
+				setShipsRandomPosition(true, true);
 			}
 		}
 		return bRet;
@@ -354,8 +354,19 @@ public class BattleShipsField extends Container {
 		m_iShipTypeCount[iType - 1] = iCount;
 		m_activeShips[iType - 1] = iCount;
 	}
+
+	public void setShipsRandomPosition() {
+		int rnd;
+		boolean touchEdge;
+		boolean noTouching;
+		
+		rnd = (int)Math.round(Math.random());
+		touchEdge = (rnd == 0) ? false : true;
+		noTouching = true;
+		setShipsRandomPosition(touchEdge, noTouching);
+	}
 	
-	public void setShipsRandomPosition(boolean touchEdge) {
+	public void setShipsRandomPosition(boolean touchEdge, boolean noTouching) {
 		BattleShip oBattleShip = null;
 		Enumeration oEnum = m_oVcBattleShips.elements();
 		int iXPos = 0;
@@ -363,6 +374,7 @@ public class BattleShipsField extends Container {
 		int iDirection;
 		int width = 0;
 		int height = 0;
+		
 		while (oEnum.hasMoreElements()) {
 			oBattleShip = (BattleShip)oEnum.nextElement();
 			do {
@@ -377,7 +389,7 @@ public class BattleShipsField extends Container {
 					oThr.sleep(1000);
 				} catch (InterruptedException e) {}*/
 				//System.out.println("width: " + width + " iXPos: " + iXPos + " cond: " + (m_iFieldWidth - width - 1));
-			} while (shipsIntersect() || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)));
+			} while (shipsIntersect(noTouching) || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)));
 		}
 	}
 	
@@ -386,9 +398,9 @@ public class BattleShipsField extends Container {
 		removeAll();
 	}
 	
-	private boolean shipsIntersect() {
+	private boolean shipsIntersect(boolean noTouching) {
 		boolean bIntersects = false;
-		Point oPnt = getShipsIntersectionPoint(false, true);
+		Point oPnt = getShipsIntersectionPoint(false, noTouching);
 		if (oPnt != null) bIntersects = true;
 		return bIntersects;
 	}
