@@ -68,7 +68,6 @@ public class BattleShipsBotLogic {
 			m_rowShotPoints.removeElementAt(size1 - 1);
 			m_nextShotPoints.removeElement(pnt);
 			m_totalShotPoints.removeElement(pnt);
-			//checkSpentFiringSolution(pnt);
 			System.out.println("El count after 1: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else if (size2 > 0) {
 			index = (int)Math.round(Math.random() * (size2 - 1));
@@ -169,7 +168,7 @@ public class BattleShipsBotLogic {
 				if (m_rowShotPoints.size() == 0) {
 					if (!sunk) {
 						//TODO: test if this logic is still necessary
-						System.out.println("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size());
+						/*System.out.println("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size());
 						if (!hit && m_lastFiringSolution.contains(shot)) {
 							if (m_plEnemyScore.hasActiveShips(3) && m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
 								System.out.println("Looking for special ships (miss): Submarine");
@@ -179,11 +178,11 @@ public class BattleShipsBotLogic {
 								System.out.println("Looking for special ships (miss): Battleship");
 								manageFiringSolutions(5);
 							}
-						} else {
-							fillNextShotPoints(shot, m_nextShotPoints);
-							System.out.println("individual next shot point: " + shot.toString());
-							//System.out.println("Shot surr: " + m_nextShotPoints.size());
-						}
+						} else {*/
+						fillNextShotPoints(shot, m_nextShotPoints);
+						System.out.println("individual next shot point: " + shot.toString());
+						//System.out.println("Shot surr: " + m_nextShotPoints.size());
+						//}
 					}
 					size = m_hitPoints.size();
 					if (size > 1) {
@@ -421,17 +420,6 @@ public class BattleShipsBotLogic {
 			surroundingFields.removeAllElements();
 		}
 		
-	}
-	
-	private void checkSpentFiringSolution(Point pnt) {
-		int i;
-		
-		for (i = 0; i < m_firingSolutions.size(); i++) {
-			if (m_firingSolutions.elementAt(i).contains(pnt)) {
-				m_firingSolutions.remove(i);
-				System.out.println("Removing firing solution");
-			}
-		}
 	}
 	
 	private boolean addRowShotPoint(Point pnt) {
