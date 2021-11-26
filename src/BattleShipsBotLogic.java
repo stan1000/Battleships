@@ -42,7 +42,7 @@ public class BattleShipsBotLogic {
 		m_nextShotPoints = new Vector<Point>();
 		m_rowShotPoints = new Vector<Point>();
 		m_fieldWidth = fieldWidth;
-		//m_firstPoint = new Point(6, 6);
+		m_firstPoint = new Point(14, 3);
 		m_plTestShips = testShips;
 		m_plEnemyScore = enemyScore;
 		m_firingSolutions = new Vector<Vector<Point>>();
@@ -148,6 +148,10 @@ public class BattleShipsBotLogic {
 					m_lastHitPoint = null;
 				}
 				if (!sunk) {
+					if (m_hitPoints.size() == 3 && !m_lastFiringSolution.contains(m_lastShot) &&  
+						!m_plEnemyScore.hasActiveShips(4) && !m_plEnemyScore.hasActiveShips(6)) {
+							m_rowShotPoints.removeAllElements();
+					}
 					if (m_lastFiringSolution.contains(shot) && hit && m_rowShotPoints.size() == 0) {
 						System.out.println("Looking for special ships (1-after sub): Battleship");
 						m_firingSolutions.removeAllElements();
@@ -195,61 +199,73 @@ public class BattleShipsBotLogic {
 						pnt1 = getLowerPoint(pnt1);
 						pnt2 = getHigherPoint(pnt2);
 						if (pnt1.x == pnt2.x) {
-							if (pnt1.y > 0) {
-								pnt1 = new Point(pnt1.x, pnt1.y - 1);
+							if (decideRowAddHV())
+							{
+								if (pnt1.y > 0) {
+									pnt1 = new Point(pnt1.x, pnt1.y - 1);
+								}
+								if (pnt2.y < m_fieldWidth - 1) {
+									pnt2 = new Point(pnt2.x, pnt2.y + 1);
+								}
+								for (i = pnt1.y; i <= pnt2.y; i++) {
+									pnt = new Point(pnt1.x, i);
+									boolean pa = addRowShotPoint(pnt);
+									pointAdded = (pointAdded || pa);
+								}
+								System.out.println("size > 1 (x): pass 1 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 							}
-							if (pnt2.y < m_fieldWidth - 1) {
-								pnt2 = new Point(pnt2.x, pnt2.y + 1);
-							}
-							for (i = pnt1.y; i <= pnt2.y; i++) {
-								pnt = new Point(pnt1.x, i);
-								boolean pa = addRowShotPoint(pnt);
-								pointAdded = (pointAdded || pa);
-							}
-							System.out.println("size > 1 (x): pass 1 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						} else if (pnt1.y == pnt2.y) {
-							if (pnt1.x > 0) {
-								pnt1 = new Point(pnt1.x - 1, pnt1.y);
+							if (decideRowAddHV())
+							{
+								if (pnt1.x > 0) {
+									pnt1 = new Point(pnt1.x - 1, pnt1.y);
+								}
+								if (pnt2.x < m_fieldWidth - 1) {
+									pnt2 = new Point(pnt2.x + 1, pnt2.y);
+								}
+								for (i = pnt1.x; i <= pnt2.x; i++) {
+									pnt = new Point(i, pnt1.y);
+									boolean pa = addRowShotPoint(pnt);
+									pointAdded = (pointAdded || pa);
+								}
+								System.out.println("size > 1 (y): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 							}
-							if (pnt2.x < m_fieldWidth - 1) {
-								pnt2 = new Point(pnt2.x + 1, pnt2.y);
-							}
-							for (i = pnt1.x; i <= pnt2.x; i++) {
-								pnt = new Point(i, pnt1.y);
-								boolean pa = addRowShotPoint(pnt);
-								pointAdded = (pointAdded || pa);
-							}
-							System.out.println("size > 1 (y): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						} else if (pnt1.y - pnt2.y == pnt1.x - pnt2.x) {
-							if (pnt1.x > 0 && pnt1.y > 0) {
-								pnt1 = new Point(pnt1.x - 1, pnt1.y - 1);
+							if (decideRowAddD())
+							{
+								if (pnt1.x > 0 && pnt1.y > 0) {
+									pnt1 = new Point(pnt1.x - 1, pnt1.y - 1);
+								}
+								if (pnt2.x < m_fieldWidth - 1 && pnt2.y < m_fieldWidth - 1) {
+									pnt2 = new Point(pnt2.x + 1, pnt2.y + 1);
+								}
+								j = 0;
+								for (i = pnt1.x; i <= pnt2.x; i++) {
+									pnt = new Point(i, pnt1.y + j);
+									boolean pa = addRowShotPoint(pnt);
+									pointAdded = (pointAdded || pa);
+									j++;
+								}
+								System.out.println("size > 1 (diagonal): pass 1 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 							}
-							if (pnt2.x < m_fieldWidth - 1 && pnt2.y < m_fieldWidth - 1) {
-								pnt2 = new Point(pnt2.x + 1, pnt2.y + 1);
-							}
-							j = 0;
-							for (i = pnt1.x; i <= pnt2.x; i++) {
-								pnt = new Point(i, pnt1.y + j);
-								boolean pa = addRowShotPoint(pnt);
-								pointAdded = (pointAdded || pa);
-								j++;
-							}
-							System.out.println("size > 1 (diagonal): pass 1 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						} else if (pnt1.x + pnt1.y == pnt2.x + pnt2.y) {
-							if (pnt1.x > 0 && pnt1.y < m_fieldWidth - 1) {
-								pnt1 = new Point(pnt1.x - 1, pnt1.y + 1);
+							if (decideRowAddD())
+							{
+								if (pnt1.x > 0 && pnt1.y < m_fieldWidth - 1) {
+									pnt1 = new Point(pnt1.x - 1, pnt1.y + 1);
+								}
+								if (pnt2.x < m_fieldWidth - 1 && pnt2.y > 0) {
+									pnt2 = new Point(pnt2.x + 1, pnt2.y - 1);
+								}
+								j = 0;
+								for (i = pnt1.x; i <= pnt2.x; i++) {
+									pnt = new Point(i, pnt1.y - j);
+									boolean pa = addRowShotPoint(pnt);
+									pointAdded = (pointAdded || pa);
+									j++;
+								}
+								System.out.println("size > 1 (diagonal): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 							}
-							if (pnt2.x < m_fieldWidth - 1 && pnt2.y > 0) {
-								pnt2 = new Point(pnt2.x + 1, pnt2.y - 1);
-							}
-							j = 0;
-							for (i = pnt1.x; i <= pnt2.x; i++) {
-								pnt = new Point(i, pnt1.y - j);
-								boolean pa = addRowShotPoint(pnt);
-								pointAdded = (pointAdded || pa);
-								j++;
-							}
-							System.out.println("size > 1 (diagonal): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
 						}
 						if (!pointAdded) {
 							applyFiringSolutionLogic("2");
@@ -272,6 +288,42 @@ public class BattleShipsBotLogic {
 		//System.out.println("Shot result: " + shot.x + " - " + shot.y + " - " + hit + " - " + sunk);
 	}
 	
+	private boolean decideRowAddHV() {
+		boolean seekRow = false;
+		if (m_hitPoints.size() < 3 && (
+								m_plEnemyScore.hasActiveShips(2) ||
+								m_plEnemyScore.hasActiveShips(3) ||
+								m_plEnemyScore.hasActiveShips(4) ||
+								m_plEnemyScore.hasActiveShips(5) ||
+								m_plEnemyScore.hasActiveShips(6)
+								)
+					|| m_hitPoints.size() <= 4 && (m_plEnemyScore.hasActiveShips(4) ||
+								m_plEnemyScore.hasActiveShips(6)
+								)
+					|| m_hitPoints.size() == 5 && m_plEnemyScore.hasActiveShips(6)
+		) {
+			seekRow = true;
+		}
+		return seekRow;
+	}
+	
+	private boolean decideRowAddD() {
+		boolean seekRow = false;
+		if (m_hitPoints.size() < 3 && (
+								m_plEnemyScore.hasActiveShips(2) ||
+								m_plEnemyScore.hasActiveShips(4) ||
+								m_plEnemyScore.hasActiveShips(6)
+								)
+					|| m_hitPoints.size() <= 4 && (m_plEnemyScore.hasActiveShips(4) ||
+								m_plEnemyScore.hasActiveShips(6)
+								)
+					|| m_hitPoints.size() == 5 && m_plEnemyScore.hasActiveShips(6)
+		) {
+			seekRow = true;
+		}
+		return seekRow;
+	}
+
 	private void applyFiringSolutionLogic(String debugMarker) {
 		if (m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
 			if (m_plEnemyScore.hasActiveShips(3)) {

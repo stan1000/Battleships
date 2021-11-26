@@ -23,7 +23,7 @@ import java.util.*;
 
 public class BattleShipsUtility {
 	
-	public final static String VERSION = "1.1";
+	public final static String VERSION = "2.0";
 	public final static int MAX_SHIP_TYPE = 6;
 	
 	private final static String CONFIG_FILE = "config.htm";
@@ -109,7 +109,7 @@ public class BattleShipsUtility {
 	}
 	
 	public static String getCopyright() {
-		return "Schiffe Versenken (Battleships) V" + VERSION + "\n© 2005-2013 Stan Holoubek\nhttp://www.stans-world.de/";
+		return "Schiffe Versenken (Battleships) V" + VERSION + "\n© 2005-2021 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
 	}
 	
 	public static String getTimeStamp() {

@@ -583,6 +583,7 @@ public class BattleShipsField extends Container {
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			m_oVcBattleShips.removeAllElements();
 		}
+		m_activeShips = m_iShipTypeCount.clone();
 	}
 	
 	public void setAllBattleShipsVisible(boolean bVisible) {
