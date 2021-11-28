@@ -37,7 +37,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 	private int m_iPort;
 	private boolean m_bAllowRemoteAdmin;
 	private String m_sRconPassword;
-	private Vector<String> m_oVcLoggedIn;
+	private ArrayList<String> m_oVcLoggedIn;
 	private BattleShipsUtility m_oUtil;
 	private PrintWriter m_bwLog;
 	private Hashtable<String, String> m_htPlayerName;
@@ -75,7 +75,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 				m_oServerSocketThread = new ServerSocketThread(this, m_iPort);
 				m_oHtBattleShipsConnection = new Hashtable<String, BattleShipsConnection>();
 				m_oHtClientMapping = new Hashtable<String, String>();
-				m_oVcLoggedIn = new Vector<String>();
+				m_oVcLoggedIn = new ArrayList<String>();
 				m_htPlayerName = new Hashtable<String, String>();
 				m_sFreeSocketIdentifier = "";
 				log(MessageFormat.format(getString("ServerStarting"), 
@@ -236,7 +236,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 			m_htPlayerName.remove(playerName);
 		}
 		if (m_oVcLoggedIn.contains(sSocketIdentifier)) {
-			m_oVcLoggedIn.removeElement(sSocketIdentifier);
+			m_oVcLoggedIn.remove(sSocketIdentifier);
 		}
 		if (sSocketIdentifier.equals(m_sFreeSocketIdentifier)) {
 			m_sFreeSocketIdentifier = "";
@@ -287,7 +287,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 						sServerResponse = getString("AlreadyLoggedIn");
 					} else {
 						if (sParameters.equals(m_sRconPassword)) {
-							m_oVcLoggedIn.addElement(sSocketIdentifier);
+							m_oVcLoggedIn.add(sSocketIdentifier);
 							sServerResponse = getString("LoggedIn");
 						} else {
 							sServerResponse = getString("WrongPassword");
@@ -296,7 +296,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 					break;
 				case 'x':
 					if (m_oVcLoggedIn.contains(sSocketIdentifier)) {
-						m_oVcLoggedIn.removeElement(sSocketIdentifier);
+						m_oVcLoggedIn.remove(sSocketIdentifier);
 						sServerResponse = getString("LoggedOut");
 					} else {
 						sServerResponse = getString("NotLoggedIn");
@@ -385,12 +385,12 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 	}
 	
 	private void sendLogToAdmins(String sMsg) {
-		Enumeration oEnum;
+		ListIterator<String> list;
 		String sSocketIdentifier;
 		if (m_oVcLoggedIn != null && !m_oVcLoggedIn.isEmpty()) {
-			oEnum = m_oVcLoggedIn.elements();
-			while (oEnum.hasMoreElements()) {
-				sSocketIdentifier = (String)oEnum.nextElement();
+			list = m_oVcLoggedIn.listIterator();
+			while (list.hasNext()) {
+				sSocketIdentifier = list.next();
 				sendMessage("serverresponse", sMsg, sSocketIdentifier);
 				System.out.println("Sending msg to " + sSocketIdentifier);
 			}

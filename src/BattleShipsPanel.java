@@ -657,7 +657,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_isBot	= value;
 	}
 	
-	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, Vector<Point> fieldHits) {
+	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {
 		String sStatus;
 		String sTmp;
 		Color oCol;

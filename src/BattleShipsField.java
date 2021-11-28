@@ -26,8 +26,8 @@ public class BattleShipsField extends Container {
 
 	private int m_iCellWidth;
 	private int m_iFieldWidth;
-	private Vector<Point> m_oVcShots;
-	private Vector<BattleShip> m_oVcBattleShips;
+	private ArrayList<Point> m_alShots;
+	private ArrayList<BattleShip> m_alBattleShips;
 	private boolean m_bEnemyField;
 	private boolean m_bPlaying;
 	private int m_iSunkCount;
@@ -62,8 +62,8 @@ public class BattleShipsField extends Container {
 		}
 		m_bPlaying = false;
 		m_iSunkCount = 0;
-		m_oVcShots = new Vector<Point>();
-		m_oVcBattleShips = new Vector<BattleShip>();
+		m_alShots = new ArrayList<Point>();
+		m_alBattleShips = new ArrayList<BattleShip>();
 		m_iShipTypeCount = new int[m_iMaxShipType];
 		m_activeShips = new int[m_iMaxShipType];
 		m_bPainting = false;
@@ -156,11 +156,10 @@ public class BattleShipsField extends Container {
 			for (i = 1; i <= iNumLines; i++) {
 				g.drawLine(0, i * m_iCellWidth, iLength - 1, i * m_iCellWidth);
 			}
-			Enumeration oEnum;
-			oEnum = m_oVcShots.elements();
-			while (oEnum.hasMoreElements()) {
-				oPoint = (Point)oEnum.nextElement();
-				if (oEnum.hasMoreElements()) {
+			ListIterator<Point> list = m_alShots.listIterator();
+			while (list.hasNext()) {
+				oPoint = list.next();
+				if (list.hasNext()) {
 					oColShotMark = m_oColShotMark;
 				} else {
 					oColShotMark = m_oColLastShotMark;
@@ -187,7 +186,7 @@ public class BattleShipsField extends Container {
 	}
 
 	private BattleShip addShip(BattleShip oBattleShip) {
-		m_oVcBattleShips.addElement(oBattleShip);
+		m_alBattleShips.add(oBattleShip);
 		return (BattleShip)add(oBattleShip);
 	}
 	
@@ -368,15 +367,15 @@ public class BattleShipsField extends Container {
 	
 	public void setShipsRandomPosition(boolean touchEdge, boolean noTouching) {
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
 		int iXPos = 0;
 		int iYPos = 0;
 		int iDirection;
 		int width = 0;
 		int height = 0;
 		
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			do {
 				iDirection = (int)Math.round(Math.random() * 3) + 1;
 				oBattleShip.setDirection(iDirection);
@@ -394,7 +393,7 @@ public class BattleShipsField extends Container {
 	}
 	
 	public void removeAllShips() {
-		m_oVcBattleShips.removeAllElements();
+		m_alBattleShips.clear();
 		removeAll();
 	}
 	
@@ -412,8 +411,8 @@ public class BattleShipsField extends Container {
 		boolean bIntersects = false;
 		int i;
 		int j;
-		BattleShip[] oObjBattleShips = new BattleShip[m_oVcBattleShips.size()];
-		m_oVcBattleShips.copyInto(oObjBattleShips);
+		BattleShip[] oObjBattleShips = new BattleShip[m_alBattleShips.size()];
+		oObjBattleShips = m_alBattleShips.toArray(oObjBattleShips);
 		BattleShip[] oObjBattleShipsChk = oObjBattleShips;
 		for (i = 0; i < oObjBattleShips.length; i++) {
 			for (j = 0; j < oObjBattleShipsChk.length; j++) {
@@ -445,11 +444,11 @@ public class BattleShipsField extends Container {
 		StringBuffer oStrBufShipInfo = new StringBuffer();
 		boolean bRun = false;
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
 		Cursor oCur = new Cursor(Cursor.DEFAULT_CURSOR);
-		while (oEnum.hasMoreElements()) {
+		while (list.hasNext()) {
 			if (bRun) oStrBufShipInfo.append("|");
-			oBattleShip = (BattleShip)oEnum.nextElement();
+			oBattleShip = list.next();
 
 			// right, doesn't really belong here, but saves us another two iterations
 			oBattleShip.setLocked(true);
@@ -471,9 +470,9 @@ public class BattleShipsField extends Container {
 
 	public void sinkShip(int iShipType) {
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			if (oBattleShip.getType() == iShipType && !oBattleShip.getSunk()) {
 				oBattleShip.setSunk();
 				m_activeShips[iShipType - 1]--;
@@ -484,21 +483,21 @@ public class BattleShipsField extends Container {
 	
 	public void showEnemyShips() {
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			if (!oBattleShip.getSunk()) {
 				oBattleShip.setForceVisibility();
 			}
 		}
 	}
 
-	public void passShot(boolean bEnemyShip, Point oPoint, boolean bHit, boolean bSunk, int iType, Vector<Point> fieldHits) {
+	public void passShot(boolean bEnemyShip, Point oPoint, boolean bHit, boolean bSunk, int iType, ArrayList<Point> fieldHits) {
 		boolean bWon = false;
 		if (bSunk) {
 			m_iSunkCount += 1;
-			//System.out.println("m_iSunkCount: " + m_iSunkCount + "	m_oVcBattleShips.size(): " +m_oVcBattleShips.size());
-			if (m_iSunkCount == m_oVcBattleShips.size()) {
+			//System.out.println("m_iSunkCount: " + m_iSunkCount + "	m_alBattleShips.size(): " +m_alBattleShips.size());
+			if (m_iSunkCount == m_alBattleShips.size()) {
 				bWon = true;
 			}
 		}
@@ -512,9 +511,9 @@ public class BattleShipsField extends Container {
 	
 	public boolean shoot(Point oPoint) {
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			if (oBattleShip.shoot(oPoint)) {
 				//System.out.println("finished shoot()");
 				return true;
@@ -537,13 +536,13 @@ public class BattleShipsField extends Container {
 	}
 	
 	private void addAndPaintShot(Point oPoint) {
-		if (!m_oVcShots.contains(oPoint)) {
+		if (!m_alShots.contains(oPoint)) {
 			Graphics oGr = getGraphics();
 			paintShot(oGr, oPoint, m_oColLastShotMark);
-			if (!m_oVcShots.isEmpty()) {
-				paintShot(oGr, m_oVcShots.lastElement(), m_oColShotMark);
+			if (!m_alShots.isEmpty()) {
+				paintShot(oGr, m_alShots.get(m_alShots.size() - 1), m_oColShotMark);
 			}
-			m_oVcShots.addElement(oPoint);
+			m_alShots.add(oPoint);
 			getBattleShipsPanel().passShot(m_bEnemyField, oPoint, false, false, 0, false, null);
 		}
 	}
@@ -566,9 +565,9 @@ public class BattleShipsField extends Container {
 		setCursor(oCur);
 		m_bPlaying = bPlaying;
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			oBattleShip.setPlaying(bPlaying);
 			oBattleShip.setCursor(oCur);
 		}
@@ -578,12 +577,12 @@ public class BattleShipsField extends Container {
 		m_bPlaying = false;
 		m_iSunkCount = 0;
 		waitForPaint();
-		m_oVcShots.removeAllElements();
+		m_alShots.clear();
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
 		Cursor oCur = new Cursor(Cursor.HAND_CURSOR);
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			if (m_bEnemyField) {
 				remove(oBattleShip);
 			} else {
@@ -593,16 +592,16 @@ public class BattleShipsField extends Container {
 		}
 		if (m_bEnemyField) {
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			m_oVcBattleShips.removeAllElements();
+			m_alBattleShips.clear();
 		}
 		m_activeShips = m_iShipTypeCount.clone();
 	}
 	
 	public void setAllBattleShipsVisible(boolean bVisible) {
 		BattleShip oBattleShip = null;
-		Enumeration oEnum = m_oVcBattleShips.elements();
-		while (oEnum.hasMoreElements()) {
-			oBattleShip = (BattleShip)oEnum.nextElement();
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
 			if (!oBattleShip.getSunk()) oBattleShip.setVisible(bVisible);
 		}
 	}

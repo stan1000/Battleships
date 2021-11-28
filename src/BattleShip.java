@@ -30,9 +30,9 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private int m_iDirection;
 	private Point m_oPntMousePos;
 	private boolean m_bLocked;
-	private Vector<Point> m_oVcShots;
-	private Vector<Point> m_oVcHits;
-	private Vector<Point> m_fieldHits;
+	private ArrayList<Point> m_oVcShots;
+	private ArrayList<Point> m_oVcHits;
+	private ArrayList<Point> m_fieldHits;
 	private Polygon m_oPolCurrentShape;
 	private int m_iHitCount;
 	private int m_iMaxHits;
@@ -42,7 +42,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private boolean m_bPlaying;
 	private Dimension m_oDimOriginal;
 	private boolean m_bHighlight;
-	private Vector<Point> m_oVcCheckPoint;
+	private ArrayList<Point> m_oVcCheckPoint;
 	private Color m_oColSunk;
 	private Color m_oColHitMark;
 	private Color m_oColShotMark;
@@ -61,10 +61,10 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		m_oPntMousePos = new Point(0, 0);
 		m_bLocked = false;
 		m_bPlaying = false;
-		m_oVcShots = new Vector<Point>();
-		m_oVcHits = new Vector<Point>();
-		m_oVcCheckPoint = new Vector<Point>();
-		m_fieldHits = new Vector<Point>();
+		m_oVcShots = new ArrayList<Point>();
+		m_oVcHits = new ArrayList<Point>();
+		m_oVcCheckPoint = new ArrayList<Point>();
+		m_fieldHits = new ArrayList<Point>();
 		m_iHitCount = 0;
 		m_iMaxHits = 0;
 		m_bSunk = false;
@@ -151,13 +151,13 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private void buildDiagonalShip() {
 		int i;
 		Integer oInt;
-		Vector<Integer> oVcXCoordsEven = new Vector<Integer>();
-		Vector<Integer> oVcXCoordsOdd = new Vector<Integer>();
-		Vector<Integer> oVcXCoords = new Vector<Integer>();
-		Vector<Integer> oVcYCoordsEven = new Vector<Integer>();
-		Vector<Integer> oVcYCoordsOdd = new Vector<Integer>();
-		Vector<Integer> oVcYCoords = new Vector<Integer>();
-		Enumeration oEnum;
+		ArrayList<Integer> oVcXCoordsEven = new ArrayList<Integer>();
+		ArrayList<Integer> oVcXCoordsOdd = new ArrayList<Integer>();
+		ArrayList<Integer> oVcXCoords = new ArrayList<Integer>();
+		ArrayList<Integer> oVcYCoordsEven = new ArrayList<Integer>();
+		ArrayList<Integer> oVcYCoordsOdd = new ArrayList<Integer>();
+		ArrayList<Integer> oVcYCoords = new ArrayList<Integer>();
+		ListIterator<Integer> list;
 		Integer[] oObjYCoords;
 		Integer[] oObjXCoords;
 		Integer oTmp;
@@ -167,70 +167,69 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		for (i = 0; i <= iHeight; i++) {
 			oInt = new Integer(i);
 			if (Math.IEEEremainder(i, 2) == 0) {
-				oVcXCoordsEven.insertElementAt(oInt, 0);
-				oVcXCoordsEven.insertElementAt(oInt, 0);
+				oVcXCoordsEven.add(0, oInt);
+				oVcXCoordsEven.add(0, oInt);
 			} else {
-				oVcXCoordsOdd.addElement(oInt);
-				oVcXCoordsOdd.addElement(oInt);
+				oVcXCoordsOdd.add(oInt);
+				oVcXCoordsOdd.add(oInt);
 			}
 		}
 
 		// prepare Y coordinates
-		oEnum = oVcXCoordsEven.elements();
-		while (oEnum.hasMoreElements()) {
+		list = oVcXCoordsEven.listIterator();
+		while (list.hasNext()) {
 			if (m_iDirection == 4 && Math.IEEEremainder(iHeight, 2) == 0) {
-				oVcYCoordsEven.addElement((Integer)oEnum.nextElement());
+				oVcYCoordsEven.add(list.next());
 			} else {
-				oVcYCoordsEven.insertElementAt((Integer)oEnum.nextElement(), 0);
+				oVcYCoordsEven.add(0, list.next());
 			}
 		}
-		oEnum = oVcXCoordsOdd.elements();
-		while (oEnum.hasMoreElements()) {
+		list = oVcXCoordsOdd.listIterator();
+		while (list.hasNext()) {
 			if (m_iDirection == 4 && Math.IEEEremainder(iHeight, 2) == 0) {
-				oVcYCoordsOdd.addElement((Integer)oEnum.nextElement());
+				oVcYCoordsOdd.add(list.next());
 			} else {
-				oVcYCoordsOdd.insertElementAt((Integer)oEnum.nextElement(), 0);
+				oVcYCoordsOdd.add(0, list.next());
 			}
 		}
 		if (m_iDirection == 4 && Math.IEEEremainder(iHeight, 2) != 0) {
-			oEnum = oVcYCoordsOdd.elements();
-			while (oEnum.hasMoreElements()) {
-				oVcYCoords.addElement((Integer)oEnum.nextElement());
+			list = oVcYCoordsOdd.listIterator();
+			while (list.hasNext()) {
+				oVcYCoords.add(list.next());
 			}
-			oEnum = oVcYCoordsEven.elements();
-			while (oEnum.hasMoreElements()) {
-				oVcYCoords.addElement((Integer)oEnum.nextElement());
+			list = oVcYCoordsEven.listIterator();
+			while (list.hasNext()) {
+				oVcYCoords.add(list.next());
 			}
 		} else {
-			oEnum = oVcYCoordsEven.elements();
-			while (oEnum.hasMoreElements()) {
-				oVcYCoords.addElement((Integer)oEnum.nextElement());
+			list = oVcYCoordsEven.listIterator();
+			while (list.hasNext()) {
+				oVcYCoords.add(list.next());
 			}
-			oEnum = oVcYCoordsOdd.elements();
-			while (oEnum.hasMoreElements()) {
-				oVcYCoords.addElement((Integer)oEnum.nextElement());
+			list = oVcYCoordsOdd.listIterator();
+			while (list.hasNext()) {
+				oVcYCoords.add(list.next());
 			}
 		}
 		
 		// prepare X coordinates
-		oTmp = oVcXCoordsEven.elementAt(oVcXCoordsEven.size() - 1);
-		oVcXCoordsEven.removeElementAt(oVcXCoordsEven.size() - 1);
-		oVcXCoordsOdd.insertElementAt(oTmp, 0);
+		oTmp = oVcXCoordsEven.remove(oVcXCoordsEven.size() - 1);
+		oVcXCoordsOdd.add(0, oTmp);
 		
-		oEnum = oVcXCoordsOdd.elements();
-		while (oEnum.hasMoreElements()) {
-			oVcXCoords.addElement((Integer)oEnum.nextElement());
+		list = oVcXCoordsOdd.listIterator();
+		while (list.hasNext()) {
+			oVcXCoords.add(list.next());
 		}
-		oEnum = oVcXCoordsEven.elements();
-		while (oEnum.hasMoreElements()) {
-			oVcXCoords.addElement((Integer)oEnum.nextElement());
+		list = oVcXCoordsEven.listIterator();
+		while (list.hasNext()) {
+			oVcXCoords.add(list.next());
 		}
 
 		// copy coordinates into arrays
 		oObjXCoords = new Integer[oVcXCoords.size()];
-		oVcXCoords.copyInto(oObjXCoords);
+		oObjXCoords = oVcXCoords.toArray(oObjXCoords);
 		oObjYCoords = new Integer[oVcYCoords.size()];
-		oVcYCoords.copyInto(oObjYCoords);
+		oObjYCoords = oVcYCoords.toArray(oObjYCoords);
 
 		// populate the polygon with points
 		m_oPolCurrentShape = new Polygon();
@@ -343,7 +342,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		}
 		// desist from removing the checkpoints while paint() is using them		
 		waitForPaint();
-		m_oVcCheckPoint.removeAllElements();
+		m_oVcCheckPoint.clear();
 		int iXCoord;
 		int iYCoord;
 		int iWidth = oReBounds.width;
@@ -355,7 +354,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			for (iYCoord = iStart; iYCoord < iHeight; iYCoord+=m_iCellWidth) {
 				oPoint = new Point(iXCoord, iYCoord);
 				if (m_oPolCurrentShape.contains(oPoint)) {
-					m_oVcCheckPoint.addElement(oPoint);
+					m_oVcCheckPoint.add(oPoint);
 				}
 			}
 		}
@@ -403,9 +402,9 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			m_iHitCount = 0;
 			m_bSunk = false;
 			waitForPaint();
-			m_oVcShots.removeAllElements();
-			m_oVcHits.removeAllElements();
-			m_fieldHits.removeAllElements();
+			m_oVcShots.clear();
+			m_oVcHits.clear();
+			m_fieldHits.clear();
 		}
 	}
 	
@@ -419,7 +418,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			Point oPntHit = new Point(iXPos, iYPos);
 			if (!m_oVcHits.contains(oPntHit)) {
 				addAndPaintHit(oPntHit);
-				m_fieldHits.addElement(oPoint);
+				m_fieldHits.add(oPoint);
 				m_oPlParent.passShot(m_bEnemyShip, oPoint, bRet, m_bSunk, m_iType, m_fieldHits);
 			}
 		}
@@ -444,7 +443,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			}
 		} else {
 			if (!m_oVcShots.contains(oPntHit)) {
-				m_oVcShots.addElement(oPntHit);
+				m_oVcShots.add(oPntHit);
 				//System.out.println("Ship " + m_iType + ", shot at " + oPntHit.toString());
 				oPntLoc = getLocation();
 				m_oPlParent.passShot(m_bEnemyShip, new Point(Math.round((iXPos + oPntLoc.x) / m_iCellWidth), Math.round((iYPos + oPntLoc.y) / m_iCellWidth)), false, false, m_iType, m_fieldHits);
@@ -456,7 +455,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		Graphics oGr = getGraphics();
 
 		m_iHitCount = m_iHitCount + 1;
-		m_oVcHits.addElement(oPoint);
+		m_oVcHits.add(oPoint);
 		if (m_iHitCount == m_iMaxHits) {
 			if (!isVisible()) setVisible(true);
 			m_bSunk = true;
@@ -521,7 +520,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	
 	public Point[] getCheckPoints() {
 		Point[] oPnt = new Point[m_oVcCheckPoint.size()];
-		m_oVcCheckPoint.copyInto(oPnt);
+		oPnt = m_oVcCheckPoint.toArray(oPnt);
 		return oPnt;
 	}
 	
@@ -533,16 +532,16 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		return m_iMaxShipArea;
 	}
 	
-	public Vector<Point> getPossibleHitpoints() {
+	public ArrayList<Point> getPossibleHitpoints() {
 		int x, y, i;
 		Point tmp;
 		int offset = Math.round(m_iCellWidth / 2);
-		Vector<Point> posHitPoints = new Vector<Point>();
+		ArrayList<Point> posHitPoints = new ArrayList<Point>();
 		for (i = 0; i < m_oVcCheckPoint.size(); i++) {
-			tmp = m_oVcCheckPoint.elementAt(i);
+			tmp = m_oVcCheckPoint.get(i);
 			x = (tmp.x - offset) / m_iCellWidth + m_oPntPos.x;
 			y = (tmp.y - offset) / m_iCellWidth + m_oPntPos.y;
-			posHitPoints.addElement(new Point(x, y));
+			posHitPoints.add(new Point(x, y));
 		}
 		return posHitPoints;
 	}
@@ -675,11 +674,11 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			g.fillPolygon(m_oPolCurrentShape);
 		} else {
 			//System.out.println(this.toString() + ": paintShipSegments::painting segments");
-			Enumeration oEnum = m_oVcCheckPoint.elements();
+			ListIterator<Point> list = m_oVcCheckPoint.listIterator();
 			int i = 0;
-			while (oEnum.hasMoreElements()) {
+			while (list.hasNext()) {
 				i++;
-				oPoint = (Point)oEnum.nextElement();
+				oPoint = list.next();
 				g.drawImage(oImgSegment, oPoint.x - Math.round(m_iCellWidth / 2) + 1, oPoint.y - Math.round(m_iCellWidth / 2) + 1, this);
 			}
 		}
@@ -688,9 +687,9 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private void paintHits(Graphics g) {
 		Point oPoint = null;
 
-		Enumeration oEnum = m_oVcHits.elements();
-		while (oEnum.hasMoreElements()) {
-			oPoint = (Point)oEnum.nextElement();
+		ListIterator<Point> list = m_oVcHits.listIterator();
+		while (list.hasNext()) {
+			oPoint = list.next();
 			//System.out.println("Ship " + m_iType + " (is enemy: " + m_bEnemyShip + ") hit at X: " + oPoint.x + "  Y: " + oPoint.y);
 			paintHit(g, oPoint, m_oColHitMark);
 		}
