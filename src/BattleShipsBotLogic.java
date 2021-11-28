@@ -35,6 +35,8 @@ public class BattleShipsBotLogic {
 	private Vector<Vector<Point>> m_firingSolutions;
 	private Vector<Point> m_lastFiringSolution;
 	private BattleShipsField m_plEnemyScore;
+	private ArrayList<ArrayList<Point>> m_quadrantList;
+	private int m_quadrantCounter;
 		
 	public BattleShipsBotLogic(int fieldWidth, BattleShipsField testShips, BattleShipsField enemyScore) {
 		m_totalShotPoints = new Vector<Point>();
@@ -47,6 +49,8 @@ public class BattleShipsBotLogic {
 		m_plEnemyScore = enemyScore;
 		m_firingSolutions = new Vector<Vector<Point>>();
 		m_lastFiringSolution = new Vector<Point>();
+		m_quadrantList = new ArrayList<ArrayList<Point>>();
+		m_quadrantCounter = 0;
 		fillTotalShotPoints();
 		/*addRowShotPoint(new Point(12, 9));
 		addRowShotPoint(new Point(10, 10));
@@ -68,22 +72,26 @@ public class BattleShipsBotLogic {
 			m_rowShotPoints.removeElementAt(size1 - 1);
 			m_nextShotPoints.removeElement(pnt);
 			m_totalShotPoints.removeElement(pnt);
+			removeShotPoint(pnt);
 			System.out.println("El count after 1: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else if (size2 > 0) {
 			index = (int)Math.round(Math.random() * (size2 - 1));
 			pnt = m_nextShotPoints.elementAt(index);
 			m_nextShotPoints.removeElementAt(index);
 			m_totalShotPoints.removeElement(pnt);
+			removeShotPoint(pnt);
 			System.out.println("El count after 2: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else {
 			if (m_firstPoint != null) {
 				pnt = m_firstPoint;
 				m_totalShotPoints.removeElement(pnt);
+				removeShotPoint(pnt);
 				m_firstPoint = null;
 			} else {
 				index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
 				pnt = m_totalShotPoints.elementAt(index);
 				m_totalShotPoints.removeElementAt(index);
+				pnt = getNextShotPoint();
 			}
 			System.out.println("El count after 4: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		}
@@ -96,7 +104,7 @@ public class BattleShipsBotLogic {
 		Point pnt, pnt1, pnt2;
 		BattleShip shipPattern;
 		boolean pointAdded = false;
-		
+
 		if (sunk) {
 			System.out.println("fieldHits.size(): " + fieldHits.size());
 			for (i = 0; i < fieldHits.size(); i++) {
@@ -403,7 +411,7 @@ public class BattleShipsBotLogic {
 					}
 					if (isSubset) {
 						for (l = 0; l < possibleHitpoints.size(); l++) {
-							if (!m_totalShotPoints.contains(possibleHitpoints.elementAt(l))) {
+							if (!containsShotPoint(possibleHitpoints.elementAt(l))) {
 								isSubset = false;
 								break;
 							}
@@ -425,7 +433,7 @@ public class BattleShipsBotLogic {
 	private boolean addRowShotPoint(Point pnt) {
 		boolean pointAdded = false;
 
-		if (m_totalShotPoints.contains(pnt)) {
+		if (containsShotPoint(pnt)) {
 			m_rowShotPoints.addElement(pnt);
 			pointAdded = true;
 			System.out.println("addRowShotPoint: " + pnt.toString());
@@ -464,12 +472,150 @@ public class BattleShipsBotLogic {
 	}
 	
 	private void fillTotalShotPoints() {
+		//TODO: implement quadrants for more intelligent shooting
+		int quadrantBase;
+		int quadrantWidth;
+		ArrayList<Point> quadrant;
+		Point pnt;
+		
+		if (m_fieldWidth < 12) {
+			quadrantBase = 3;
+		} else if (m_fieldWidth < 20) {
+			quadrantBase = 4;
+		} else {
+			quadrantBase = 5;
+		}
+		
+		quadrantWidth = Math.round(m_fieldWidth / quadrantBase);
+		System.out.println("quadrantWidth-18: " + quadrantWidth);
+		
 		int x, y;
+		int i, j;
+		int rest;
+		int diff;
+		int startX, endX, startY, endY;
+		
+		rest = m_fieldWidth - quadrantBase * quadrantWidth;
+		diff = quadrantBase - rest;
+		
+		for (i = 0; i < quadrantBase; i++) {
+			startY = i * quadrantWidth;
+			endY = startY + quadrantWidth;
+			for (j = 0; j < quadrantBase; j++) {
+				quadrant = new ArrayList<Point>();
+				for (y = startY; y < endY; y++) {
+					startX = j * quadrantWidth;
+					endX = startX + quadrantWidth;
+					for (x = startX; x < endX; x++) {
+						System.out.println((new Point(x, y)).toString());
+						quadrant.add(new Point(x, y));
+					}
+				}
+				m_quadrantList.add(quadrant);
+			}
+			System.out.println("Quadrant count: " + m_quadrantList.size());
+			if (rest > 0) {
+				quadrant = new ArrayList<Point>();
+				for (y = startY; y < endY; y++) {
+					startX = quadrantBase * quadrantWidth;
+					endX = startX + rest;
+					for (x = startX; x < endX; x++) {
+						System.out.println((new Point(x, y)).toString() );
+						quadrant.add(new Point(x, y));
+					}
+				}
+				m_quadrantList.add(quadrant);
+			}
+		}
+		if (rest > 0) {
+			startY = quadrantBase * quadrantWidth;
+			endY = startY + rest;
+			for (j = 0; j < quadrantBase; j++) {
+				quadrant = new ArrayList<Point>();
+				for (y = startY; y < endY; y++) {
+					startX = j * quadrantWidth;
+					endX = startX + quadrantWidth;
+					for (x = startX; x < endX; x++) {
+						System.out.println((new Point(x, y)).toString() );
+						quadrant.add(new Point(x, y));
+					}
+				}
+				m_quadrantList.add(quadrant);
+			}
+			quadrant = new ArrayList<Point>();
+			for (y = startY; y < endY; y++) {
+				startX = quadrantBase * quadrantWidth;
+				endX = startX + rest;
+				for (x = startX; x < endX; x++) {
+					System.out.println((new Point(x, y)).toString() );
+					quadrant.add(new Point(x, y));
+				}
+			}
+			m_quadrantList.add(quadrant);
+		}
+
+		System.out.println("Quadrant count: " + m_quadrantList.size());
+
+		
 		for (y = 0; y < m_fieldWidth; y++) {
 			for (x = 0; x < m_fieldWidth; x++) {
 				m_totalShotPoints.addElement(new Point(x, y));
 			}
 		}
+	}
+	
+	private Point getNextShotPoint() {
+		ArrayList<Point> quadrant;
+		Point pnt;
+		int index;
+
+		// this List of lists will need to contain 
+		// all of the ArrayLists you would like to sort
+		/*Collections.sort(m_quadrantList, new Comparator<ArrayList>(){
+			public int compare(ArrayList a1, ArrayList a2) {
+				return a2.size() - a1.size(); // assumes you want biggest to smallest
+			}
+		});*/
+		if (m_quadrantCounter + 1 > m_quadrantList.size()) {
+			m_quadrantCounter = m_quadrantList.size() - 1;
+		}
+		quadrant = m_quadrantList.get(m_quadrantCounter);
+		index = (int)Math.round(Math.random() * (quadrant.size() - 1));
+		pnt = quadrant.remove(index);
+		System.out.println("Quadrant size: " + quadrant.size() + "\r\n" + quadrant.toString());
+		m_quadrantCounter++;
+		if (m_quadrantCounter + 1 > m_quadrantList.size()) {
+			m_quadrantCounter = 0;
+		}
+		return pnt;
+	}
+	
+	private void removeShotPoint(Point pnt) {
+		int i;
+		ArrayList<Point> quadrant;
+		
+		for (i = 0; i < m_quadrantList.size(); i++) {
+			quadrant = m_quadrantList.get(i);
+			if (quadrant.contains(pnt)) {
+				quadrant.remove(pnt);
+				break;
+			}
+		}
+	}
+	
+	private boolean containsShotPoint(Point pnt) {
+		int i;
+		ArrayList<Point> quadrant;
+		boolean containsPoint = false;
+		
+		for (i = 0; i < m_quadrantList.size(); i++) {
+			quadrant = m_quadrantList.get(i);
+			if (quadrant.contains(pnt)) {
+				containsPoint = true;
+				break;
+			}
+		}
+		return containsPoint;
 	}
 
 	private void fillNextShotPoints(Point shot, Vector<Point> nextShotPoints) {
@@ -489,14 +635,14 @@ public class BattleShipsBotLogic {
 		if (shot.y + range > m_fieldWidth - 1) endY = m_fieldWidth - 1;
 		else endY = shot.y + range;
 		if (addSourcePoint) {
-			if (ignoreSpentShots || m_totalShotPoints.contains(shot) && !nextShotPoints.contains(shot)) {
+			if (ignoreSpentShots || containsShotPoint(shot) && !nextShotPoints.contains(shot)) {
 				nextShotPoints.addElement(shot);
 			}
 		}
 		for (x = startX; x <= endX; x++) {
 			for (y = startY; y <= endY; y++) {
 				pnt = new Point(x, y);
-				if (ignoreSpentShots || m_totalShotPoints.contains(pnt) && !nextShotPoints.contains(pnt)) {
+				if (ignoreSpentShots || containsShotPoint(pnt) && !nextShotPoints.contains(pnt)) {
 					nextShotPoints.addElement(pnt);
 				}
 			}
