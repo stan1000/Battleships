@@ -21,12 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class BattleShipsField extends Container {
 
 	private int m_iCellWidth;
 	private int m_iFieldWidth;
-	private ArrayList<Point> m_alShots;
+	private CopyOnWriteArrayList<Point> m_alShots;
 	private ArrayList<BattleShip> m_alBattleShips;
 	private boolean m_bEnemyField;
 	private boolean m_bPlaying;
@@ -42,7 +43,6 @@ public class BattleShipsField extends Container {
 	private Color m_oColLastShotMark;
 	private Image m_oImgShipSegment;
 	private Image m_oImgShipSegmentSunk;
-	private boolean m_bPainting;
 	private Cursor m_bShootCursor;
 	private BattleShip[] m_bsShipPattern;
 	private int[] m_activeShips;
@@ -62,11 +62,10 @@ public class BattleShipsField extends Container {
 		}
 		m_bPlaying = false;
 		m_iSunkCount = 0;
-		m_alShots = new ArrayList<Point>();
+		m_alShots = new CopyOnWriteArrayList<Point>();
 		m_alBattleShips = new ArrayList<BattleShip>();
 		m_iShipTypeCount = new int[m_iMaxShipType];
 		m_activeShips = new int[m_iMaxShipType];
-		m_bPainting = false;
 		//**addMouseListener(new TheMouseAdapter((Object)this, "BattleShipsField"));
 		addMouseListener(new TheMouseAdapter((Object)this, "i"));
 	}
@@ -139,7 +138,6 @@ public class BattleShipsField extends Container {
 		Point oPoint = null;
 		Color oColShotMark = null;
 		
-		m_bPainting = true;
 		//System.out.println("Starting painting of BattleShipsField");
 		g.setColor(getBackground());
 		g.fillRect(0, 0, oReDim.width - 1, oReDim.height - 1);
@@ -181,7 +179,6 @@ public class BattleShipsField extends Container {
 				g.drawString(String.valueOf(i - 1), i * m_iCellWidth - Math.round(m_iCellWidth / 2) - 6, m_iCellWidth - 3);
 			}
 		}
-		m_bPainting = false;
 		//System.out.println("Finished painting of BattleShipsField");
 	}
 
@@ -565,14 +562,6 @@ public class BattleShipsField extends Container {
 		}
 	}
 	
-	private void waitForPaint() {
-		while (m_bPainting) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {}
-		}
-	}
-	
 	public void setPlaying(boolean bPlaying) {
 		Cursor oCur;
 		if (bPlaying) {
@@ -594,7 +583,6 @@ public class BattleShipsField extends Container {
 	public void reset() {
 		m_bPlaying = false;
 		m_iSunkCount = 0;
-		waitForPaint();
 		m_alShots.clear();
 		BattleShip oBattleShip = null;
 		Cursor oCur = new Cursor(Cursor.HAND_CURSOR);

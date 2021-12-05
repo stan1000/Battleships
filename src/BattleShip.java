@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class BattleShip extends Container implements MouseListener, MouseMotionListener {
 
@@ -42,7 +43,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private boolean m_bPlaying;
 	private Dimension m_oDimOriginal;
 	private boolean m_bHighlight;
-	private ArrayList<Point> m_alCheckPoint;
+	private CopyOnWriteArrayList<Point> m_alCheckPoint;
 	private Color m_oColSunk;
 	private Color m_oColHitMark;
 	private Color m_oColShotMark;
@@ -52,7 +53,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	private Image m_oImgSegment;
 	private Image m_oImgSegmentSunk;
 	private int m_iMaxShipArea;
-	private boolean m_bPainting;
 
 	public BattleShip(int iCellWidth, int iType, boolean bEnemyShip) {
 		m_iCellWidth = iCellWidth;
@@ -63,7 +63,7 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		m_bPlaying = false;
 		m_alShots = new ArrayList<Point>();
 		m_alHits = new ArrayList<Point>();
-		m_alCheckPoint = new ArrayList<Point>();
+		m_alCheckPoint = new CopyOnWriteArrayList<Point>();
 		m_fieldHits = new ArrayList<Point>();
 		m_iHitCount = 0;
 		m_iMaxHits = 0;
@@ -73,7 +73,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 		m_bHighlight = false;
 		m_bForceVisibility = false;
 		m_iMaxShipArea = 0;
-		m_bPainting = false;
 		int iWidth = 0;
 		int iHeight = 0;
 		switch (m_iType) {
@@ -340,8 +339,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 				}
 				break;
 		}
-		// desist from removing the checkpoints while paint() is using them		
-		waitForPaint();
 		m_alCheckPoint.clear();
 		int iXCoord;
 		int iYCoord;
@@ -401,7 +398,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			m_bPlaying = false;
 			m_iHitCount = 0;
 			m_bSunk = false;
-			waitForPaint();
 			m_alShots.clear();
 			m_alHits.clear();
 			m_fieldHits.clear();
@@ -464,14 +460,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			//System.out.println("Sunk the ship.");
 		} else {
 			if (isVisible()) paintHit(oGr, oPoint, m_oColHitMark);
-		}
-	}
-	
-	private void waitForPaint() {
-		while (m_bPainting) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {}
 		}
 	}
 	
@@ -549,7 +537,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 	public void paint(Graphics g) {
 		if (g == null) return;
 		//System.out.println("Starting painting of ship " + m_iType);
-		m_bPainting = true;
 		if (!m_bEnemyShip || m_bForceVisibility) {
 			paintShipSegments(g);
 		}
@@ -561,7 +548,6 @@ public class BattleShip extends Container implements MouseListener, MouseMotionL
 			g.drawRect(2, 2, oDim.width - 4, oDim.height - 4);
 		}
 		super.paint(g);
-		m_bPainting = false;
 		//System.out.println("Finished painting of ship " + m_iType);
 	}
 	
