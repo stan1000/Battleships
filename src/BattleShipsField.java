@@ -535,6 +535,24 @@ public class BattleShipsField extends Container {
 		return (BattleShipsPanel)(getParent().getParent());
 	}
 	
+	public int getActiveShipsFieldPercent() {
+        int percent;
+		int activeShipFieldCount = 0;
+		int inactiveShipFieldCount = 0;
+		BattleShip oBattleShip = null;
+		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		while (list.hasNext()) {
+			oBattleShip = list.next();
+			if (oBattleShip.getSunk()) {
+				inactiveShipFieldCount++;
+			} else {
+				activeShipFieldCount++;
+			}
+		}
+        percent = (int)Math.round((double)activeShipFieldCount / (double)(activeShipFieldCount + inactiveShipFieldCount) * 100d);
+		return percent;
+	}
+
 	private void addAndPaintShot(Point oPoint) {
 		if (!m_alShots.contains(oPoint)) {
 			Graphics oGr = getGraphics();
