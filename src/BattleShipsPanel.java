@@ -115,6 +115,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_connectToFirstPlayer;
 	private boolean m_isBot;
 	private BattleShipsBotLogic m_Ai;
+	private boolean m_gameOver;
+	private boolean m_botPaused;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -166,6 +168,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_showSelectEnemy = false;
 		m_enemyPlayerName = "";
 		m_connectToFirstPlayer = false;
+		m_gameOver = true;
+		m_botPaused = true;
 		
 		// get external config parms
 		m_iCellWidth = parseIntParm("CellWidth", 10);
@@ -390,6 +394,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oLblChat = (TextDisplayPanel)m_oCntMain.add(new TextDisplayPanel());
 		m_oLblChat.setFont(oFntMainFont);
 		m_oLblChat.setText(getString("Chat"), TextDisplayPanel.AUTO_RESIZE);
+		//**m_oLblChat.addMouseListener(new TheMouseAdapter((Object)this, "LblChat"));
+		m_oLblChat.addMouseListener(new TheMouseAdapter((Object)this, "ch"));
 
 		m_oTxtChatOutput = (TextArea)m_oCntMain.add(new TextArea("", 1, 1, TextArea.SCROLLBARS_VERTICAL_ONLY));
 		m_oTxtChatOutput.setEditable(false);
@@ -711,6 +717,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				oCol = new Color(180, 0, 0);
 				m_oPntScore.y++;
 			}
+			m_gameOver = true;
+			m_botPaused = true;
 			m_oPlEnemyShips.setPlaying(false);
 			setButtonLabelAndSize(m_oBtnReady, getString("NewGame"), false);
 			m_oBtnReady.setEnabled(true);
@@ -761,10 +769,12 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	}
 	
 	private void shootBot() {
-		try {
-			Thread.sleep(BOT_DELAY);
-		} catch (InterruptedException e) {}
-		m_oPlEnemyShips.shoot(m_Ai.getNextShot());
+		if (!m_botPaused) {
+			try {
+				Thread.sleep(BOT_DELAY);
+			} catch (InterruptedException e) {}
+			m_oPlEnemyShips.shoot(m_Ai.getNextShot());
+		}
 	}
 	
 	private void setScoreBounds() {
@@ -938,6 +948,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			if (m_isBot) {
 				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
 				m_oPlMyShips.setShipsRandomPosition();
+				m_botPaused = false;
 			}
 		} else if (sMessage.equals("chat")) {
 			if (!m_enemyPlayerName.equals("")) {
@@ -1171,6 +1182,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private void reset() {
 		//System.out.println("starting reset()");
 		m_bPlaying = false;
+		m_gameOver = true;
+		m_botPaused = true;
 		m_bMeReady = false;
 		m_bEnemyReady = false;
 		m_bMyTurn = false;
@@ -1232,13 +1245,16 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	private void setReady() {
 		if (m_bPlaying) {
-			sendMessage("newgame", "1");
-			reset();
-			setStatus(getString("NewGame"));
+			if (!m_isBot || m_gameOver) {
+				sendMessage("newgame", "1");
+				reset();
+				setStatus(getString("NewGame"));
+			}
 		} else {
 			if (m_isBot) {
 				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
 				m_oPlMyShips.setShipsRandomPosition();
+				m_botPaused = false;
 			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
 			if (oPntShips != null) {
@@ -1251,6 +1267,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				sendMessage("shipinfo", m_oCryptUtil.encode(sShipInfo));
 				m_bPlaying = true;
 				m_bMeReady = true;
+				m_gameOver = false;
 				if (m_bEnemyReady) {
 					m_oBtnReady.setEnabled(false);
 				} else {
@@ -1302,6 +1319,17 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 					sendMessage("chat", sText);
 				}
 			}
+		}
+	}
+
+	//**public void LblChat_MouseClicked(MouseEvent event) {
+	public void ch_ou(MouseEvent event) {
+		if (!m_isBot || event.getModifiers() != 16) return;
+		if (m_botPaused) {
+			m_botPaused = false;
+			shootBot();
+		} else {
+			m_botPaused = true;
 		}
 	}
 	
