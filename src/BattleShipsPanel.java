@@ -995,6 +995,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				), TextDisplayPanel.AUTO_RESIZE
 			);
 			m_btnDisconnectEnemy.setVisible(true);
+			if (m_isBot) {
+				m_oPlMyShips.setShipsRandomPosition();
+			}
 			setEnemyFound();
 		} else if (sMessage.equals("status")) {
 			if (sData.equals("Connected")) {
@@ -1253,7 +1256,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		} else {
 			if (m_isBot) {
 				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
-				m_oPlMyShips.setShipsRandomPosition();
 				m_botPaused = false;
 			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
