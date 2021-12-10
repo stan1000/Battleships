@@ -120,7 +120,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
-	private final int BOT_DELAY = 500;
 	
 	public BattleShipsPanel(boolean bClientOnly) {
 		m_bClientOnly = bClientOnly;
@@ -771,7 +770,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private void shootBot() {
 		if (!m_botPaused) {
 			try {
-				Thread.sleep(BOT_DELAY);
+				Thread.sleep(BattleShipsBotLogic.BOT_DELAY);
 			} catch (InterruptedException e) {}
 			m_oPlEnemyShips.shoot(m_Ai.getNextShot());
 		}
@@ -938,7 +937,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			}
 			if (m_isBot) {
 				try {
-					Thread.sleep(BOT_DELAY);
+					Thread.sleep(BattleShipsBotLogic.BOT_DELAY);
 				} catch (InterruptedException e) {}
 				setReady();
 			}
