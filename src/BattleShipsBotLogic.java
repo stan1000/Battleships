@@ -38,7 +38,7 @@ public class BattleShipsBotLogic {
 	private BattleShipsField m_plEnemyScore;
 	private boolean m_seekBorders;
 	
-	public static final int BOT_DELAY = 500;
+	public static final int BOT_DELAY = 200;
 		
 	public BattleShipsBotLogic(int fieldWidth, BattleShipsField testShips, BattleShipsField enemyScore) {
 		m_totalShotPoints = new ArrayList<Point>();
@@ -486,8 +486,8 @@ public class BattleShipsBotLogic {
 		4. include position of already sunk ships into next shot decision - nope
 		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include borders (from 70%/65% on?)
 		6. give spaces touching existing (sunk) ships lower priority than those not touching, combine with pattern search ... ?
-		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships
-		TODO: decrease regular random border seek ...
+		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships - done
+		TODO: decrease regular random border seek ... DONE
 		Goal: all ships found when 60% - 55% of fields are left
 		*/
 		Point pnt;
@@ -511,14 +511,14 @@ public class BattleShipsBotLogic {
 			m_seekBorders = true;
 		}
 		
-		for (i = 0; i < 50; i++) {
+		for (i = 0; i < 100; i++) {
 			matrix = new ArrayList<Point>();
 			randomBorderShot = Math.random();
 			do {
 				index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
 				pnt = m_totalShotPoints.get(index);
 			} while (!m_seekBorders && (pnt.x == 0 || pnt.y == 0 || pnt.x == m_fieldWidth - 1 || pnt.y == m_fieldWidth - 1) && randomBorderShot > 0.2d);
-			if (percent > 60 || percent < 55 && percent > 49) { // > 75? < 50
+			if (percent > 65 || percent < 55 && percent > 45) { // > 75? < 50
 				findSurrShots(pnt, matrix, range);
 			} else {
 				seekShotCrossing(pnt, matrix);
@@ -526,7 +526,7 @@ public class BattleShipsBotLogic {
 			matrixList.add(matrix);
 			//System.out.println("Point: " + pnt + " - Matrix size: " + matrix.size());
 		}
-		if (percent > 60 || percent < 55 && percent > 49) {
+		if (percent > 65 || percent < 55 && percent > 45) {
 			Collections.sort(matrixList, new Comparator<ArrayList>(){
 				public int compare(ArrayList a1, ArrayList a2) {
 					return a1.size() - a2.size(); // ascending
@@ -701,5 +701,19 @@ public class BattleShipsBotLogic {
 			}
 		}
 		//System.out.println("Point: " + shot.toString() + "Crossing: " + crossing.toString());
+	}
+	
+	private class BotShot {
+		private int m_priority;
+		private Point m_shot;
+		
+		public BotShot(int priority, Point shot) {
+			m_priority = priority;
+			m_shot = shot;
+		}
+		
+		public Point getShot() {
+			return m_shot;
+		}
 	}
 }
