@@ -34,7 +34,7 @@ public class BattleShipsBotLogic {
 	private Point m_lastHitPoint;
 	private Point m_lastShot;
 	private BattleShipsField m_plTestShips;
-	private ArrayList<ArrayList<Point>> m_firingSolutions;
+	private ArrayList<BotShot> m_firingSolutions;
 	private ArrayList<Point> m_lastFiringSolution;
 	private BattleShipsField m_plEnemyScore;
 	private boolean m_seekBorders;
@@ -51,7 +51,7 @@ public class BattleShipsBotLogic {
 		m_firstPoint = new Point(14, 3);
 		m_plTestShips = testShips;
 		m_plEnemyScore = enemyScore;
-		m_firingSolutions = new ArrayList<ArrayList<Point>>();
+		m_firingSolutions = new ArrayList<BotShot>();
 		m_lastFiringSolution = new ArrayList<Point>();
 		m_seekBorders = false;
 		fillTotalShotPoints();
@@ -352,9 +352,11 @@ public class BattleShipsBotLogic {
 		ArrayList<Point> firingSolution;
 		int i;
 		Point pnt;
+		BotShot botShot;
 		
 		m_rowShotPoints.clear();
-		firingSolution = m_firingSolutions.remove(0);
+		botShot = m_firingSolutions.remove(0);
+		firingSolution = botShot.getFiringSolution();
 		m_lastFiringSolution = firingSolution;
 		for (i = 0; i < firingSolution.size(); i++) {
 			pnt = firingSolution.get(i);
@@ -371,6 +373,9 @@ public class BattleShipsBotLogic {
 		BattleShip shipPattern = m_plTestShips.getShipPattern(shipType);
 		int range;
 		int maxShipPattern;
+		boolean touchesHit;
+		int priority;
+		BotShot botShot;
 		
 		if (shipType == 3) {
 			range = 1;
@@ -406,9 +411,22 @@ public class BattleShipsBotLogic {
 							}
 						}
 						if (isSubset) {
-							if (!m_firingSolutions.contains(possibleHitpoints)) {
-								m_firingSolutions.add(possibleHitpoints);
-								//System.out.println("Added firing solution: " + possibleHitpoints.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
+							if (!containsFiringSolution(possibleHitpoints)) {
+								touchesHit = false;
+								for (l = 0; l < possibleHitpoints.size(); l++) {
+									if (checkSurrHits(possibleHitpoints.get(l), 1)) {
+										touchesHit = true;
+										break;
+									}
+								}
+								if (!touchesHit) {
+									priority = 1;
+								} else {
+									priority = 2;
+								}
+								botShot = new BotShot(priority, possibleHitpoints);
+								m_firingSolutions.add(botShot);
+								System.out.println("Added firing solution: " + botShot.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
 							}
 						}
 					}
@@ -416,7 +434,22 @@ public class BattleShipsBotLogic {
 			}
 			surroundingFields.clear();
 		}
+		m_firingSolutions.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending
+	}
+	
+	private boolean containsFiringSolution(ArrayList<Point> firingSolution) {
+		int i;
+		BotShot botShot;
+		boolean containsSolution = false;
 		
+		for (i = 0; i < m_firingSolutions.size(); i++) {
+			botShot = m_firingSolutions.get(i);
+			if (firingSolution.equals(botShot.getFiringSolution())) {
+				containsSolution = true;
+				break;
+			}
+		}
+		return containsSolution;
 	}
 	
 	private boolean addRowShotPoint(Point pnt) {
@@ -498,7 +531,7 @@ public class BattleShipsBotLogic {
 		int shipPercent = m_plEnemyScore.getActiveShipsFieldPercent();
 		double randomBorderShot;
 		int matrixIndex;
-		BotShot shot;
+		BotShot botShot;
 		
 		if (percent > 89) // 89?
 			range = 2;
@@ -529,10 +562,10 @@ public class BattleShipsBotLogic {
 		} else {
 			shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
 		}
-		shot = shotList.get(0);
-		pnt = shot.getShot();
+		botShot = shotList.get(0);
+		pnt = botShot.getShot();
 		m_totalShotPoints.remove(pnt);
-		System.out.println("Chosen Shot: " + shot + " - percent: " + percent);
+		System.out.println("Chosen Shot: " + botShot + " - percent: " + percent);
 		//System.out.println("Shotlist: " + shotList.toString());
 		return pnt;
 	}
@@ -559,13 +592,13 @@ public class BattleShipsBotLogic {
 
 	private void removeSurrShotPoint(Point pnt) {
 		int i;
-		BotShot shot;
+		BotShot botShot;
 		
 		for (i = 0; i < m_surrShotPoints.size(); i++) {
-			shot = m_surrShotPoints.get(i);
-			if (pnt.equals(shot.getShot())) {
+			botShot = m_surrShotPoints.get(i);
+			if (pnt.equals(botShot.getShot())) {
 				m_surrShotPoints.remove(i);
-				System.out.println("Found and removing surr. point: " + shot.toString());
+				System.out.println("Found and removing surr. point: " + botShot.toString());
 				break;
 			}
 		}
@@ -573,12 +606,12 @@ public class BattleShipsBotLogic {
 	
 	private boolean containsSurrShotPoint(Point pnt) {
 		int i;
-		BotShot shot;
+		BotShot botShot;
 		boolean containsPoint = false;
 		
 		for (i = 0; i < m_surrShotPoints.size(); i++) {
-			shot = m_surrShotPoints.get(i);
-			if (pnt.equals(shot.getShot())) {
+			botShot = m_surrShotPoints.get(i);
+			if (pnt.equals(botShot.getShot())) {
 				containsPoint = true;
 				break;
 			}
@@ -761,7 +794,9 @@ public class BattleShipsBotLogic {
 		}
 		
 		public String toString() {
-			return "int Priority[" + m_priority + "], " + m_shot.toString();
+			return "Priority [" + m_priority + 
+			"], FiringSolution [" + (m_firingSolution == null ? "" : m_firingSolution.toString()) + 
+			"]" + (m_shot == null ? "" : m_shot.toString());
 		}
 		
 		public ArrayList<Point> getFiringSolution() {
