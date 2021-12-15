@@ -20,13 +20,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 import java.awt.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class BattleShipsBotLogic {
 		
 	private int m_fieldWidth;
 	private ArrayList<Point> m_totalShotPoints;
 	private ArrayList<Point> m_hitPoints;
-	private ArrayList<Point> m_nextShotPoints;
+	private ArrayList<BotShot> m_surrShotPoints;
 	private ArrayList<Point> m_rowShotPoints;
 	private ArrayList<Point> m_totalHitPoints;
 	private Point m_firstPoint;
@@ -43,7 +44,7 @@ public class BattleShipsBotLogic {
 	public BattleShipsBotLogic(int fieldWidth, BattleShipsField testShips, BattleShipsField enemyScore) {
 		m_totalShotPoints = new ArrayList<Point>();
 		m_hitPoints = new ArrayList<Point>();
-		m_nextShotPoints = new ArrayList<Point>();
+		m_surrShotPoints = new ArrayList<BotShot>();
 		m_rowShotPoints = new ArrayList<Point>();
 		m_totalHitPoints = new ArrayList<Point>();
 		m_fieldWidth = fieldWidth;
@@ -66,19 +67,18 @@ public class BattleShipsBotLogic {
 	
 	public Point getNextShot() {
 		Point pnt;
+		BotShot surrShot;
 		int index;
 		int size1 = m_rowShotPoints.size();
-		int size2 = m_nextShotPoints.size();
+		int size2 = m_surrShotPoints.size();
 		if (size1 > 0) {
 			pnt = m_rowShotPoints.get(size1 - 1);
 			m_rowShotPoints.remove(size1 - 1);
-			m_nextShotPoints.remove(pnt);
+			removeSurrShotPoint(pnt);
 			m_totalShotPoints.remove(pnt);
 			System.out.println("El count after 1: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else if (size2 > 0) {
-			index = (int)Math.round(Math.random() * (size2 - 1));
-			pnt = m_nextShotPoints.get(index);
-			m_nextShotPoints.remove(index);
+			pnt = getSurrShotPoint();
 			m_totalShotPoints.remove(pnt);
 			System.out.println("El count after 2: (" + pnt.toString() + ")" + m_totalShotPoints.size());
 		} else {
@@ -119,20 +119,20 @@ public class BattleShipsBotLogic {
 			size = m_hitPoints.size();
 			if (size > 0) {
 				m_rowShotPoints.clear();
-				m_nextShotPoints.clear();
+				m_surrShotPoints.clear();
 				m_firingSolutions.clear();
 				m_lastFiringSolution.clear();
 				for (i = 0; i < size; i++) {
 					pnt = m_hitPoints.get(i);
 					System.out.println("next shot point: " + pnt.toString());
-					fillNextShotPoints(pnt, m_nextShotPoints);
+					fillSurrShotPoints(pnt, m_surrShotPoints);
 				}
-			//System.out.println("size > 1 (Surr full): " + m_nextShotPointsFull.size());
+			//System.out.println("size > 1 (Surr full): " + m_surrShotPointsFull.size());
 			}
 		}
 		if (sunk && m_hitPoints.size() == 0) {
 			m_rowShotPoints.clear();
-			m_nextShotPoints.clear();
+			m_surrShotPoints.clear();
 			m_firingSolutions.clear();
 			m_lastFiringSolution.clear();
 			m_lastHitPoint = null;
@@ -177,9 +177,9 @@ public class BattleShipsBotLogic {
 				}
 				if (m_rowShotPoints.size() == 0) {
 					if (!sunk) {
-						fillNextShotPoints(shot, m_nextShotPoints);
+						fillSurrShotPoints(shot, m_surrShotPoints);
 						System.out.println("individual next shot point: " + shot.toString());
-						//System.out.println("Shot surr: " + m_nextShotPoints.size());
+						//System.out.println("Shot surr: " + m_surrShotPoints.size());
 					}
 					size = m_hitPoints.size();
 					if (size > 1) {
@@ -466,9 +466,6 @@ public class BattleShipsBotLogic {
 		
 		for (y = 0; y < m_fieldWidth; y++) {
 			for (x = 0; x < m_fieldWidth; x++) {
-				/*index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
-				if (index < 0)
-				index = 0;*/
 				m_totalShotPoints.add(new Point(x, y));
 			}
 		}
@@ -485,20 +482,23 @@ public class BattleShipsBotLogic {
 		3. when looking for 5 or 6-part rowship, check if it fits available space - nope
 		4. include position of already sunk ships into next shot decision - nope
 		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include borders (from 70%/65% on?)
-		6. give spaces touching existing (sunk) ships lower priority than those not touching, combine with pattern search ... ?
+		6. give spaces touching existing (sunk) ships lower priority than those not touching - done
 		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships - done
+		8. implement pattern search to the end of game (from 55 - 50%?)
+		9. add priority to firing solutions (lower p. for those touching sunk ships)
 		TODO: decrease regular random border seek ... DONE
+		TODO: when priotizing surr. points, ignore content of m_hitPoints ... DONE
 		Goal: all ships found when 60% - 55% of fields are left
 		*/
 		Point pnt;
 		int i, index;
 		int range;
-		ArrayList<Point> matrix;
-		ArrayList<ArrayList<Point>> matrixList = new ArrayList<ArrayList<Point>>();
+		ArrayList<BotShot> shotList = new ArrayList<BotShot>();
         int percent = (int)Math.round((double)m_totalShotPoints.size() / (double)(m_fieldWidth * m_fieldWidth) * 100d);
 		int shipPercent = m_plEnemyScore.getActiveShipsFieldPercent();
 		double randomBorderShot;
 		int matrixIndex;
+		BotShot shot;
 		
 		if (percent > 89) // 89?
 			range = 2;
@@ -512,73 +512,117 @@ public class BattleShipsBotLogic {
 		}
 		
 		for (i = 0; i < 100; i++) {
-			matrix = new ArrayList<Point>();
 			randomBorderShot = Math.random();
 			do {
 				index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
 				pnt = m_totalShotPoints.get(index);
 			} while (!m_seekBorders && (pnt.x == 0 || pnt.y == 0 || pnt.x == m_fieldWidth - 1 || pnt.y == m_fieldWidth - 1) && randomBorderShot > 0.2d);
 			if (percent > 65 || percent < 55 && percent > 45) { // > 75? < 50
-				findSurrShots(pnt, matrix, range);
+				findSurrShots(pnt, shotList, range);
 			} else {
-				seekShotCrossing(pnt, matrix);
+				seekShotCrossing(pnt, shotList);
 			}
-			matrixList.add(matrix);
 			//System.out.println("Point: " + pnt + " - Matrix size: " + matrix.size());
 		}
 		if (percent > 65 || percent < 55 && percent > 45) {
-			Collections.sort(matrixList, new Comparator<ArrayList>(){
-				public int compare(ArrayList a1, ArrayList a2) {
-					return a1.size() - a2.size(); // ascending
-				}
-			});
+			shotList.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending		
 		} else {
-			Collections.sort(matrixList, new Comparator<ArrayList>(){
-				public int compare(ArrayList a1, ArrayList a2) {
-					return a2.size() - a1.size(); // descending
-				}
-			});
+			shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
 		}
-		//matrixIndex = (int)Math.round(Math.random() * 5);
-		matrixIndex = 0;
-		matrix = matrixList.get(matrixIndex);
-		pnt = matrix.get(0);
-		//TEST
-		//index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
-		//pnt = m_totalShotPoints.remove(index);
+		shot = shotList.get(0);
+		pnt = shot.getShot();
 		m_totalShotPoints.remove(pnt);
-		System.out.println("Chosen Point: " + pnt + " - Matrix size: " + matrix.size() + " - percent: " + percent);
-		System.out.println("Chosen Matrix: " + matrix.toString() + " - matrixIndex: " + matrixIndex);
+		System.out.println("Chosen Shot: " + shot + " - percent: " + percent);
+		//System.out.println("Shotlist: " + shotList.toString());
 		return pnt;
 	}
 
+	private Point getSurrShotPoint() {
+		ArrayList<BotShot> subList;
+		BotShot surrShot;
+		int index;
+		
+		subList = (ArrayList<BotShot>)m_surrShotPoints.stream().filter(p -> p.getPriority() == 1).collect(Collectors.toList());
+		if (subList.size() == 0) {
+			subList = m_surrShotPoints;
+		}
+		System.out.println("subList: " + subList.toString());
+		index = (int)Math.round(Math.random() * (subList.size() - 1));
+		surrShot = subList.get(index);
+		m_surrShotPoints.remove(surrShot);
+		return surrShot.getShot();
+	}
+	
 	private boolean containsShotPoint(Point pnt) {
 		return m_totalShotPoints.contains(pnt);
 	}
 
-	private void fillNextShotPoints(Point shot, ArrayList<Point> nextShotPoints) {
-		fillNextShotPoints(shot, nextShotPoints, false, false, 1);
+	private void removeSurrShotPoint(Point pnt) {
+		int i;
+		BotShot shot;
+		
+		for (i = 0; i < m_surrShotPoints.size(); i++) {
+			shot = m_surrShotPoints.get(i);
+			if (pnt.equals(shot.getShot())) {
+				m_surrShotPoints.remove(i);
+				System.out.println("Found and removing surr. point: " + shot.toString());
+				break;
+			}
+		}
 	}
 	
+	private boolean containsSurrShotPoint(Point pnt) {
+		int i;
+		BotShot shot;
+		boolean containsPoint = false;
+		
+		for (i = 0; i < m_surrShotPoints.size(); i++) {
+			shot = m_surrShotPoints.get(i);
+			if (pnt.equals(shot.getShot())) {
+				containsPoint = true;
+				break;
+			}
+		}
+		return containsPoint;
+	}
+	
+	private void fillSurrShotPoints(Point shot, ArrayList<BotShot> surrShotPoints) {
+		int x, y, i;
+		int priority;
+		Point pnt;
+		int range = 1;
+		BotShot nextShot;
+		SeekBounds bounds = new SeekBounds(shot, range, m_fieldWidth);
+		
+		for (x = bounds.getStartX(); x <= bounds.getEndX(); x++) {
+			for (y = bounds.getStartY(); y <= bounds.getEndY(); y++) {
+				pnt = new Point(x, y);
+				if (containsShotPoint(pnt) && !containsSurrShotPoint(pnt)) {
+					if (!checkSurrHits(pnt, 1)) {
+						priority = 1;
+					} else {
+						priority = 2;
+					}
+					nextShot = new BotShot(priority, pnt);
+					surrShotPoints.add(nextShot);
+				}
+			}
+		}
+		System.out.println("surrShotPoints: " + surrShotPoints.toString());
+	}
+
 	private void fillNextShotPoints(Point shot, ArrayList<Point> nextShotPoints, boolean addSourcePoint, boolean ignoreSpentShots, int range) {
-		int startX, startY, endX, endY;
 		int x, y, i;
 		Point pnt;
-		if (shot.x - range < 0) startX = 0;
-		else startX = shot.x - range;
-		if (shot.x + range > m_fieldWidth - 1) endX = m_fieldWidth - 1;
-		else endX = shot.x + range;
-		if (shot.y - range < 0) startY = 0;
-		else startY = shot.y - range;
-		if (shot.y + range > m_fieldWidth - 1) endY = m_fieldWidth - 1;
-		else endY = shot.y + range;
+		SeekBounds bounds = new SeekBounds(shot, range, m_fieldWidth);
+		
 		if (addSourcePoint) {
 			if (ignoreSpentShots || containsShotPoint(shot) && !nextShotPoints.contains(shot)) {
 				nextShotPoints.add(shot);
 			}
 		}
-		for (x = startX; x <= endX; x++) {
-			for (y = startY; y <= endY; y++) {
+		for (x = bounds.getStartX(); x <= bounds.getEndX(); x++) {
+			for (y = bounds.getStartY(); y <= bounds.getEndY(); y++) {
 				pnt = new Point(x, y);
 				if (ignoreSpentShots || containsShotPoint(pnt) && !nextShotPoints.contains(pnt)) {
 					nextShotPoints.add(pnt);
@@ -587,64 +631,50 @@ public class BattleShipsBotLogic {
 		}
 	}
 
-	private void findSurrShots(Point shot, ArrayList<Point> surrShots, int range) {
+	private void findSurrShots(Point shot, ArrayList<BotShot> surrShots, int range) {
 		int startX, startY, endX, endY;
 		int x, y, i;
+		int priority = 1;
 		Point pnt;
 		boolean addedHitBias = false;
-		if (shot.x - range < 0) startX = 0;
-		else startX = shot.x - range;
-		if (shot.x + range > m_fieldWidth - 1) endX = m_fieldWidth - 1;
-		else endX = shot.x + range;
-		if (shot.y - range < 0) startY = 0;
-		else startY = shot.y - range;
-		if (shot.y + range > m_fieldWidth - 1) endY = m_fieldWidth - 1;
-		else endY = shot.y + range;
-		surrShots.add(shot);
-		for (x = startX; x <= endX; x++) {
-			for (y = startY; y <= endY; y++) {
+		SeekBounds bounds = new SeekBounds(shot, range, m_fieldWidth);
+		
+		for (x = bounds.getStartX(); x <= bounds.getEndX(); x++) {
+			for (y = bounds.getStartY(); y <= bounds.getEndY(); y++) {
 				pnt = new Point(x, y);
 				if (!containsShotPoint(pnt)) {
-					surrShots.add(pnt);
+					priority++;
 				}
 				if (!addedHitBias && m_totalHitPoints.contains(pnt)) {
-					for (i = 0; i < 8; i++) {
-						surrShots.add(new Point(99, 99));
-					}
+					priority += 8;
 					addedHitBias = true;
 				}
 			}
 		}
+		surrShots.add(new BotShot(priority, shot));
 	}
 
 	private boolean checkSurrHits(Point shot, int range) {
 		int startX, startY, endX, endY;
 		int x, y, i;
 		Point pnt;
-		boolean hasSurrHits = false;
-		if (shot.x - range < 0) startX = 0;
-		else startX = shot.x - range;
-		if (shot.x + range > m_fieldWidth - 1) endX = m_fieldWidth - 1;
-		else endX = shot.x + range;
-		if (shot.y - range < 0) startY = 0;
-		else startY = shot.y - range;
-		if (shot.y + range > m_fieldWidth - 1) endY = m_fieldWidth - 1;
-		else endY = shot.y + range;
-		for (x = startX; x <= endX; x++) {
-			for (y = startY; y <= endY; y++) {
+		boolean surrHits = false;
+		SeekBounds bounds = new SeekBounds(shot, range, m_fieldWidth);
+		
+		for (x = bounds.getStartX(); x <= bounds.getEndX(); x++) {
+			for (y = bounds.getStartY(); y <= bounds.getEndY(); y++) {
 				pnt = new Point(x, y);
-				if (m_totalHitPoints.contains(pnt)) {
+				if (m_totalHitPoints.contains(pnt) && !m_hitPoints.contains(pnt)) {
 					System.out.println("hasSurrHits: " + pnt.toString());
-					hasSurrHits = true;
+					surrHits = true;
 					break;
 				}
 			}
-			if (hasSurrHits) break;
 		}
-		return hasSurrHits;
+		return surrHits;
 	}
 
-	private void seekShotCrossing(Point shot, ArrayList<Point> crossing) {
+	private void seekShotCrossing(Point shot, ArrayList<BotShot> crossing) {
 		Point pnt;
 		int i;
 		int xLeft = 0;
@@ -653,67 +683,124 @@ public class BattleShipsBotLogic {
 		int yDown = 0;
 		int yCount = 0;
 		int xBias, yBias;
-		crossing.add(shot);
+		int priority = 1;
+
 		for (i = shot.x - 1; i >= 0; i--) {
 			pnt = new Point(i, shot.y);
 			if (containsShotPoint(pnt)) {
-				crossing.add(pnt);
+				xLeft++;
 			} else {
 				break;
 			}
-			xLeft++;
 		}
+		priority += xLeft - 1;
 		for (i = shot.x + 1; i < m_fieldWidth; i++) {
 			pnt = new Point(i, shot.y);
 			if (containsShotPoint(pnt)) {
-				crossing.add(pnt);
+				xRight++;
 			} else {
 				break;
 			}
-			xRight++;
 		}
+		priority += xRight - 1;
 		xBias = xLeft + xRight + 1 - Math.abs(xLeft - xRight);
 		//System.out.println("xBias: " + xBias);
 		for (i = shot.y - 1; i >= 0; i--) {
 			pnt = new Point(shot.x, i);
 			if (containsShotPoint(pnt)) {
-				crossing.add(pnt);
+				yUp++;
 			} else {
 				break;
 			}
-			yUp++;
 		}
+		priority += yUp - 1;
 		for (i = shot.y + 1; i < m_fieldWidth; i++) {
 			pnt = new Point(shot.x, i);
 			if (containsShotPoint(pnt)) {
-				crossing.add(pnt);
+				yDown++;
 			} else {
 				break;
 			}
-			yDown++;
 		}
+		priority += yDown - 1;
 		yBias = yUp + yDown + 1 - Math.abs(xLeft - xRight);
 		//System.out.println("yBias: " + yBias);
 		if (!checkSurrHits(shot, 1)) {
-			pnt = new Point(99, 99); //padding ...
-			for (i = 0; i < xBias + yBias; i++) {
-				crossing.add(pnt);
-			}
+			priority += xBias + yBias;
 		}
+		crossing.add(new BotShot(priority, shot));
 		//System.out.println("Point: " + shot.toString() + "Crossing: " + crossing.toString());
 	}
 	
 	private class BotShot {
 		private int m_priority;
 		private Point m_shot;
+		private ArrayList<Point> m_firingSolution;
+		
+		public BotShot(int x, int y) {
+			m_priority = 0;
+			m_shot = new Point(x, y);
+		}
 		
 		public BotShot(int priority, Point shot) {
 			m_priority = priority;
 			m_shot = shot;
 		}
 		
+		public BotShot(int priority, ArrayList<Point> firingSolution) {
+			m_priority = priority;
+			m_firingSolution = firingSolution;
+		}
+		
 		public Point getShot() {
 			return m_shot;
 		}
+		
+		public int getPriority() {
+			return m_priority;
+		}
+		
+		public String toString() {
+			return "int Priority[" + m_priority + "], " + m_shot.toString();
+		}
+		
+		public ArrayList<Point> getFiringSolution() {
+			return m_firingSolution;
+		}
+	}
+	
+	private class SeekBounds {
+		private int m_startX;
+		private int m_startY;
+		private int m_endX;
+		private int m_endY;
+		
+		public SeekBounds(Point shot, int range, int fieldWidth) {
+			if (shot.x - range < 0) m_startX = 0;
+			else m_startX = shot.x - range;
+			if (shot.x + range > fieldWidth - 1) m_endX = fieldWidth - 1;
+			else m_endX = shot.x + range;
+			if (shot.y - range < 0) m_startY = 0;
+			else m_startY = shot.y - range;
+			if (shot.y + range > fieldWidth - 1) m_endY = fieldWidth - 1;
+			else m_endY = shot.y + range;
+		}
+		
+		public int getStartX() {
+			return m_startX;
+		}
+		
+		public int getStartY() {
+			return m_startY;
+		}
+		
+		public int getEndX() {
+			return m_endX;
+		}
+		
+		public int getEndY() {
+			return m_endY;
+		}
+		
 	}
 }
