@@ -1,7 +1,7 @@
 /*
 Battleships - The popular game as client/server edition for playing with a friend over the Internet (or on the LAN).
-Copyright (C) 2006-2009 Stan's World
-http://www.stans-world.de/
+Copyright (C) 2006-2022 Stan's World
+http://www.stans-world.de/battleships.html
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -43,9 +43,9 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 	public BattleShipsBot(String[] args) {
 		String playerName;
 		String isVisible;
-		m_serverName = (args.length > 0 ? args[0] : DEFAULT_SERVER);
-		isVisible = (args.length > 1 ? args[1] : "true");
-		playerName = (args.length > 2 ? args[2] : DEFAULT_PLAYER_NAME);
+		isVisible = (args.length > 0 ? args[0] : "true");
+		playerName = (args.length > 1 ? args[1] : DEFAULT_PLAYER_NAME);
+		m_serverName = (args.length > 2 ? args[2] : DEFAULT_SERVER);
 		m_oUtil = new BattleShipsUtility();
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
