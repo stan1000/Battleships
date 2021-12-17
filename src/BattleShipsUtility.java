@@ -1,7 +1,7 @@
 /*
 Battleships - The popular game as client/server edition for playing with a friend over the Internet (or on the LAN).
-Copyright (C) 2006-2009 Stan's World
-http://www.stans-world.de/
+Copyright (C) 2006-2022 Stan's World
+http://www.stans-world.de/battleships.html
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -109,7 +109,7 @@ public class BattleShipsUtility {
 	}
 	
 	public static String getCopyright() {
-		return "Schiffe Versenken (Battleships) V" + VERSION + "\n© 2005-2021 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
+		return "Schiffe Versenken (Battleships) V" + VERSION + "\n© 2005-2022 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
 	}
 	
 	public static String getTimeStamp() {
