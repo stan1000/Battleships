@@ -20,7 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 import java.awt.*;
 import java.util.*;
-import java.util.stream.*;
 
 public class BattleShipsBotLogic {
 		
@@ -37,10 +36,10 @@ public class BattleShipsBotLogic {
 	private ArrayList<BotShot> m_firingSolutions;
 	private ArrayList<Point> m_lastFiringSolution;
 	private BattleShipsField m_plEnemyScore;
-	private boolean m_seekBorders;
+	private boolean m_seekEdges;
 	
 	public static final int BOT_DELAY = 200;
-	private static final double BORDER_SHOT_PROBABILITY = 0.1d;
+	private static final double EDGE_SHOT_PROBABILITY = 0.2d;
 		
 	public BattleShipsBotLogic(int fieldWidth, BattleShipsField testShips, BattleShipsField enemyScore) {
 		m_totalShotPoints = new ArrayList<Point>();
@@ -54,7 +53,7 @@ public class BattleShipsBotLogic {
 		m_plEnemyScore = enemyScore;
 		m_firingSolutions = new ArrayList<BotShot>();
 		m_lastFiringSolution = new ArrayList<Point>();
-		m_seekBorders = false;
+		m_seekEdges = false;
 		fillTotalShotPoints();
 		/*addRowShotPoint(new Point(12, 9));
 		addRowShotPoint(new Point(10, 10));
@@ -143,7 +142,7 @@ public class BattleShipsBotLogic {
 				m_lastShot = shot;
 				if (hit) {
 					if (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1) {
-						m_seekBorders = true;
+						m_seekEdges = true;
 					};
 					if (!sunk) {
 						m_lastHitPoint = shot;
@@ -435,7 +434,8 @@ public class BattleShipsBotLogic {
 			}
 			surroundingFields.clear();
 		}
-		m_firingSolutions.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending
+		Collections.sort(m_firingSolutions, BotShot.PriorityAsc);
+		//m_firingSolutions.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending
 	}
 	
 	private boolean containsFiringSolution(ArrayList<Point> firingSolution) {
@@ -507,7 +507,7 @@ public class BattleShipsBotLogic {
 
 	private Point getNextShotPoint() {
 		/* TODO:
-		1. decrease probability weight of border shots to not waste shots; but reintroduce normal weight if border ship found
+		1. decrease probability weight of edge shots to not waste shots; but reintroduce normal weight if edge ship found
 			- threshold 1:
 			< 65 % of fields left; > 20 % of ship fields left
 			- threshold 2:
@@ -515,12 +515,19 @@ public class BattleShipsBotLogic {
 		2. add starting pattern (slightly randomized, though) for first cpl of shots - not necessary
 		3. when looking for 5 or 6-part rowship, check if it fits available space - nope
 		4. include position of already sunk ships into next shot decision - nope
-		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include borders (from 70%/65% on?)
+		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include edges (from 70%/65% on?)
 		6. give spaces touching existing (sunk) ships lower priority than those not touching - done
 		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships (see 6.) - done
 		8. implement pattern search to the end of game (from 65 - 60%?) (see 5.)
+			- @65%: check for Battleships
+			- @60%: check for Subs, Destroyers
+			- @55%: (earlier, if no other ships left?) check for Frigate + Minesweeper: top 10 best points, 
+				check for those where either fits in all different positions/directions/shifted,
+				prioritize those with no adjacent sunk ships?
+			- look for areas with the least hitpoints (vs. shotpoints like in the other logic), get those points and do the checks
 		9. add priority to firing solutions (lower p. for those touching sunk ships) - done
-		TODO: decrease regular random border seek ... DONE
+		10. every now and then, place a ship directly adjacent to another one ...
+		TODO: decrease regular random edge seek ... DONE
 		TODO: when priotizing surr. points, ignore content of m_hitPoints ... DONE
 		TODO: check bug with totalhitpoints vs. fieldhits, when looking for firing solutions
 		
@@ -532,7 +539,7 @@ public class BattleShipsBotLogic {
 		ArrayList<BotShot> shotList = new ArrayList<BotShot>();
         int percent = (int)Math.round((double)m_totalShotPoints.size() / (double)(m_fieldWidth * m_fieldWidth) * 100d);
 		int shipPercent = m_plEnemyScore.getActiveShipsFieldPercent();
-		double randomBorderShot;
+		double randomEdgeShot;
 		int matrixIndex;
 		BotShot botShot;
 		
@@ -544,24 +551,26 @@ public class BattleShipsBotLogic {
 		System.out.println("Ship Percentage Left: " + shipPercent);
 
 		if (percent < 50 && shipPercent > 20 || percent < 40) {
-			m_seekBorders = true;
+			m_seekEdges = true;
 		}
 		
-		randomBorderShot = Math.random();
+		randomEdgeShot = Math.random();
 		for (i = 0; i < 100; i++) {
 			index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
 			pnt = m_totalShotPoints.get(index);
-			if (percent > 65 || percent < 55 && percent > 45) { // > 75? < 50
-				findSurrShots(pnt, shotList, range, randomBorderShot);
+			if (percent > 63 || percent < 53 && percent > 43 || percent < 38) { // > 75? < 50
+				findSurrShots(pnt, shotList, range, randomEdgeShot);
 			} else {
-				seekShotCrossing(pnt, shotList, randomBorderShot);
+				seekShotCrossing(pnt, shotList, randomEdgeShot);
 			}
 			//System.out.println("Point: " + pnt + " - Matrix size: " + matrix.size());
 		}
-		if (percent > 65 || percent < 55 && percent > 45) {
-			shotList.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending		
+		if (percent > 63 || percent < 53 && percent > 43 || percent < 38) {
+			Collections.sort(shotList, BotShot.PriorityAsc);
+			//shotList.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending		
 		} else {
-			shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
+			Collections.sort(shotList, BotShot.PriorityDesc);
+			//shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
 		}
 		botShot = shotList.get(0);
 		pnt = botShot.getShot();
@@ -572,11 +581,18 @@ public class BattleShipsBotLogic {
 	}
 
 	private Point getSurrShotPoint() {
-		ArrayList<BotShot> subList;
+		ArrayList<BotShot> subList = new ArrayList<BotShot>();
 		BotShot surrShot;
 		int index;
+		int i;
 		
-		subList = (ArrayList<BotShot>)m_surrShotPoints.stream().filter(p -> p.getPriority() == 1).collect(Collectors.toList());
+		for (i = 0; i < m_surrShotPoints.size(); i++) {
+			surrShot = m_surrShotPoints.get(i);
+			if (surrShot.getPriority() == 1) {
+				subList.add(surrShot);
+			}
+		}
+		//subList = (ArrayList<BotShot>)m_surrShotPoints.stream().filter(p -> p.getPriority() == 1).collect(Collectors.toList());
 		if (subList.size() == 0) {
 			subList = m_surrShotPoints;
 		}
@@ -665,7 +681,7 @@ public class BattleShipsBotLogic {
 		}
 	}
 
-	private void findSurrShots(Point shot, ArrayList<BotShot> surrShots, int range, double randomBorderShot) {
+	private void findSurrShots(Point shot, ArrayList<BotShot> surrShots, int range, double randomEdgeShot) {
 		int startX, startY, endX, endY;
 		int x, y, i;
 		int priority = 1;
@@ -685,7 +701,7 @@ public class BattleShipsBotLogic {
 				}
 			}
 		}
-		if (!m_seekBorders && randomBorderShot > BORDER_SHOT_PROBABILITY && (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1)) {
+		if (!m_seekEdges && randomEdgeShot > EDGE_SHOT_PROBABILITY && (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1)) {
 			priority += 4;
 		}
 		surrShots.add(new BotShot(priority, shot));
@@ -711,7 +727,7 @@ public class BattleShipsBotLogic {
 		return surrHits;
 	}
 
-	private void seekShotCrossing(Point shot, ArrayList<BotShot> crossing, double randomBorderShot) {
+	private void seekShotCrossing(Point shot, ArrayList<BotShot> crossing, double randomEdgeShot) {
 		Point pnt;
 		int i;
 		int xLeft = 0;
@@ -762,53 +778,14 @@ public class BattleShipsBotLogic {
 		priority += yDown - 1;
 		yBias = yUp + yDown + 1 - Math.abs(xLeft - xRight);
 		//System.out.println("yBias: " + yBias);
-		if (!checkSurrHits(shot, 1)) {
-			priority += xBias + yBias;
+		if (!m_seekEdges && randomEdgeShot > EDGE_SHOT_PROBABILITY && (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1)) {
+			//priority -= 4;
 		}
-		if (!m_seekBorders && randomBorderShot > BORDER_SHOT_PROBABILITY && (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1)) {
-			priority -= 4;
+		if (checkSurrHits(shot, 1)) {
+			priority = 1;
 		}
 		crossing.add(new BotShot(priority, shot));
 		//System.out.println("Point: " + shot.toString() + "Crossing: " + crossing.toString());
-	}
-	
-	private class BotShot {
-		private int m_priority;
-		private Point m_shot;
-		private ArrayList<Point> m_firingSolution;
-		
-		public BotShot(int x, int y) {
-			m_priority = 0;
-			m_shot = new Point(x, y);
-		}
-		
-		public BotShot(int priority, Point shot) {
-			m_priority = priority;
-			m_shot = shot;
-		}
-		
-		public BotShot(int priority, ArrayList<Point> firingSolution) {
-			m_priority = priority;
-			m_firingSolution = firingSolution;
-		}
-		
-		public Point getShot() {
-			return m_shot;
-		}
-		
-		public int getPriority() {
-			return m_priority;
-		}
-		
-		public String toString() {
-			return "Priority [" + m_priority + 
-			"], FiringSolution [" + (m_firingSolution == null ? "" : m_firingSolution.toString()) + 
-			"], " + (m_shot == null ? "" : m_shot.toString());
-		}
-		
-		public ArrayList<Point> getFiringSolution() {
-			return m_firingSolution;
-		}
 	}
 	
 	private class SeekBounds {
