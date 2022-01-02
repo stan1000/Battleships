@@ -109,7 +109,7 @@ public class BattleShipsUtility {
 	}
 	
 	public static String getCopyright() {
-		return "Schiffe Versenken (Battleships) V" + VERSION + "\n© 2005-2022 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
+		return "Schiffe Versenken (Battleships) V" + VERSION + "\n\u00a9 2005-2022 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
 	}
 	
 	public static String getTimeStamp() {
