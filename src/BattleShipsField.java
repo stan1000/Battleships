@@ -370,8 +370,10 @@ public class BattleShipsField extends Container {
 		int iDirection;
 		int width = 0;
 		int height = 0;
+		int randomCounter;
 		
 		while (list.hasNext()) {
+			randomCounter = 0;
 			oBattleShip = list.next();
 			do {
 				iDirection = (int)Math.round(Math.random() * 3) + 1;
@@ -381,11 +383,14 @@ public class BattleShipsField extends Container {
 				iXPos = (int)Math.round(Math.random() * (m_iFieldWidth - width));
 				iYPos = (int)Math.round(Math.random() * (m_iFieldWidth - height));
 				oBattleShip.setPosition(iXPos, iYPos);
+				randomCounter++;
 				/*try {
 					oThr.sleep(1000);
 				} catch (InterruptedException e) {}*/
 				//System.out.println("width: " + width + " iXPos: " + iXPos + " cond: " + (m_iFieldWidth - width - 1));
-			} while (shipsIntersect(noTouching) || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)));
+			} while (
+				randomCounter < 1000 && (shipsIntersect(noTouching) || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)))
+			);
 		}
 	}
 	
