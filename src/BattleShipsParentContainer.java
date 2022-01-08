@@ -35,8 +35,12 @@ public interface BattleShipsParentContainer {
 	
 	public void setNormalState();
 	
-	public void getCookie(String cookieName);
+	public String getCookie(String cookieName);
+							
+	public String getCookie(String cookieName, String defaultValue);
 							
 	public void setCookie(String cookieName, String value, int expDays);
+	
+	public void setWindowTitle(String title);
 
 }

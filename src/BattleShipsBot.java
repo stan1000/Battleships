@@ -105,12 +105,22 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		toFront();
 	}
 
-	public void getCookie(String cookieName) {
-		// keep or compabilility
+	public String getCookie(String cookieName) {
+		// keep for compabilility
+		return "";
 	}
 							
+	public String getCookie(String cookieName, String defaultValue) {
+		// keep for compabilility
+		return "";
+	}
+
 	public void setCookie(String cookieName, String value, int expDays) {
-		// keep or compabilility
+		// keep for compabilility
+	}
+
+	public void setWindowTitle(String title) {
+		setTitle(title);
 	}
 
 	protected void processWindowEvent(WindowEvent e) {

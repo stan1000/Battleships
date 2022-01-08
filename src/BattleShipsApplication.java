@@ -46,7 +46,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 		m_propCookies = new Properties();
 		m_cl = this.getClass().getClassLoader();
 		readCookieFile();
-		getCookie("ServerName");
+		m_serverName = getCookie("ServerName", DEFAULT_SERVER);
 		if (m_oUtil.readParameters()) {
 			setLayout(null);
 			setResizable(false);
@@ -120,18 +120,25 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 		} catch (Exception e ) { }
 	}
 
-	public void getCookie(String cookieName) {
-		String value = m_propCookies.getProperty(cookieName, "");
-		if (cookieName.equals("PlayerName")) {
-			m_oBtlShips.setPlayerName(value);
-		} else if (cookieName.equals("ServerName")) {
-			m_serverName = (value.equals("") ? DEFAULT_SERVER : value);
-		}
+	public String getCookie(String cookieName) {
+		return getCookie(cookieName, "");
+	}
+							
+	public String getCookie(String cookieName, String defaultValue) {
+		return m_propCookies.getProperty(cookieName, defaultValue);
 	}
 							
 	public void setCookie(String cookieName, String value, int expDays) {
 		m_propCookies.setProperty(cookieName, value);
 		writeCookieFile();
+	}
+
+	public void setWindowTitle(String title) {
+		String windowTitle = getParameter("String_Title");
+		if (!title.equals("")) {
+			windowTitle += " - " + title;
+		}
+		setTitle(windowTitle);
 	}
 
 	protected void processWindowEvent(WindowEvent e) {
