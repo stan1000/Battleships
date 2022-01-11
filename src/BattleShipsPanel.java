@@ -117,12 +117,14 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private BattleShipsBotLogic m_Ai;
 	private boolean m_gameOver;
 	private boolean m_botPaused;
+	private boolean m_autoBot;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
 	
 	public BattleShipsPanel(boolean bClientOnly) {
 		m_bClientOnly = bClientOnly;
+		m_autoBot = false;
 	}
 	
 	public void init() {
@@ -659,8 +661,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		return bRet;
 	}
 	
-	public void setIsBot(boolean value) {
+	public void setIsBot(boolean value, boolean autoBot) {
 		m_isBot	= value;
+		m_autoBot = autoBot;
 	}
 	
 	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {
@@ -1412,9 +1415,24 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 
 	//**public void GameOver_TimerEvent() {
 	public void i_b() {
-		if (m_bPlaySound) playAudioClip(m_oAuGameOver);
-		m_oPlEnemyShips.showEnemyShips();
-		m_oCntState.start();
+		if (m_isBot && m_autoBot) {
+			setReady();
+			m_botPaused = false;
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {}
+			if (!m_botPaused)
+				setReady();
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {}
+			if (!m_botPaused)
+				shootBot();
+		} else {
+			if (m_bPlaySound) playAudioClip(m_oAuGameOver);
+			m_oPlEnemyShips.showEnemyShips();
+			m_oCntState.start();
+		}
 	}
 	
 	//**public void BtnToggleServer_MouseClicked(MouseEvent event) {

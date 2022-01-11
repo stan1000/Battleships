@@ -43,9 +43,13 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 	public BattleShipsBot(String[] args) {
 		String playerName;
 		String isVisible;
+		String tmp;
+		boolean autoBot;
 		isVisible = (args.length > 0 ? args[0] : "true");
 		playerName = (args.length > 1 ? args[1] : DEFAULT_PLAYER_NAME);
 		m_serverName = (args.length > 2 ? args[2] : DEFAULT_SERVER);
+		tmp = (args.length > 3 ? args[3] : "false");
+		autoBot = (tmp.equals("true") ? true : false);
 		m_oUtil = new BattleShipsUtility();
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
@@ -58,7 +62,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 				setVisible(true);
 				setSize(640, 480);
 			}
-			m_oBtlShips.setIsBot(true);
+			m_oBtlShips.setIsBot(true, autoBot);
 			m_oBtlShips.init();
 			m_oBtlShips.setPlayerName(playerName);
 		} else {
