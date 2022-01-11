@@ -48,7 +48,7 @@ public class BattleShipsBotLogic {
 		m_rowShotPoints = new ArrayList<Point>();
 		m_totalHitPoints = new ArrayList<Point>();
 		m_fieldWidth = fieldWidth;
-		m_firstPoint = new Point(14, 3);
+		//m_firstPoint = new Point(14, 3);
 		m_plTestShips = testShips;
 		m_plEnemyScore = enemyScore;
 		m_firingSolutions = new ArrayList<BotShot>();
@@ -269,7 +269,6 @@ public class BattleShipsBotLogic {
 					}
 				}
 			} else {
-				//System.out.println("Hitpoints: " + m_hitPoints.size());
 				if (!sunk) {
 					if (m_hitPoints.size() >= 3) {
 						m_firingSolutions.clear();
@@ -282,6 +281,10 @@ public class BattleShipsBotLogic {
 				
 		}
 		//System.out.println("Shot result: " + shot.x + " - " + shot.y + " - " + hit + " - " + sunk);
+	}
+
+	private int getShotsLeftPercent() {
+		return (int)Math.round((double)m_totalShotPoints.size() / (double)(m_fieldWidth * m_fieldWidth) * 100d);
 	}
 	
 	private boolean decideRowAddHV() {
@@ -323,16 +326,16 @@ public class BattleShipsBotLogic {
 	private void applyFiringSolutionLogic(String debugMarker) {
 		if (m_hitPoints.size() > 1 && m_hitPoints.size() <= 3) {
 			if (m_plEnemyScore.hasActiveShips(3)) {
-				//System.out.println("Looking for special ships (" + debugMarker + "): Submarine");
+				System.out.println("Looking for special ships (" + debugMarker + "): Submarine");
 				manageFiringSolutions(3);
 			} else {
-				//System.out.println("Looking for special ships (" + debugMarker + "-): Battleship");
+				System.out.println("Looking for special ships (" + debugMarker + "-): Battleship");
 				manageFiringSolutions(5);
 			}
 		}
 		//System.out.println("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size() + " - m_rowShotPoints.size(): " + m_rowShotPoints.size());
 		if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
-			//System.out.println("Looking for special ships (" + debugMarker + "): Battleship");
+			System.out.println("Looking for special ships (" + debugMarker + "): Battleship");
 			manageFiringSolutions(5);
 		}
 	}
@@ -426,7 +429,7 @@ public class BattleShipsBotLogic {
 								}
 								botShot = new BotShot(priority, possibleHitpoints);
 								m_firingSolutions.add(botShot);
-								System.out.println("Added firing solution: " + botShot.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
+								//System.out.println("Added firing solution: " + botShot.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
 							}
 						}
 					}
@@ -451,6 +454,121 @@ public class BattleShipsBotLogic {
 			}
 		}
 		return containsSolution;
+	}
+	
+	private Point getFiringPatternShotPoint() {
+		int i, j, k, l;
+		int index = 0;
+		int shipType = 0;
+		Point pnt;
+		ArrayList<BotShot> shotList = new ArrayList<BotShot>();
+		ArrayList<Point> surroundingFields = new ArrayList<Point>();
+		ArrayList<Point> possibleHitpoints;
+		boolean fitsPattern;
+		BattleShip shipPattern;
+		int range = 1;
+		int maxShipPattern;
+		boolean touches;
+		int priority;
+		BotShot botShot;
+		Point shot = null;
+		
+		if (m_plEnemyScore.hasActiveShips(5)) {
+			shipType = 5;
+		} else if (m_plEnemyScore.hasActiveShips(4)) {
+			shipType = 4;
+		} else if (m_plEnemyScore.hasActiveShips(3)) {
+			shipType = 3;
+		} else if (m_plEnemyScore.hasActiveShips(2)) {
+			shipType = 2;
+		} else if (m_plEnemyScore.hasActiveShips(1)) {
+			shipType = 1;
+		}
+		if (shipType == 0) {
+			return shot;
+		}
+		if (shipType == 5) {
+			maxShipPattern = 2;
+		} else {
+			maxShipPattern = 4;
+		}
+		shipPattern = m_plTestShips.getShipPattern(shipType);
+		
+		for (i = 0; i < m_fieldWidth * m_fieldWidth; i++) {
+			index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
+			pnt = m_totalShotPoints.get(index);
+			findSurrShots(pnt, shotList, range, EDGE_SHOT_PROBABILITY);
+		}
+		Collections.sort(shotList, BotShot.PriorityAsc);
+		
+		for (i = 0; i < m_fieldWidth * m_fieldWidth / 2; i++) {
+			pnt = shotList.get(i).getShot();
+			fillNextShotPoints(pnt, surroundingFields, true, true, range);
+			for (j = 0; j < surroundingFields.size(); j++) {
+				pnt = surroundingFields.get(j);
+				shipPattern.setPosition(pnt.x, pnt.y);
+				for (k = 1; k <= maxShipPattern; k++) {
+					shipPattern.setDirection(k);
+					possibleHitpoints = shipPattern.getPossibleHitpoints();
+					fitsPattern = true;
+					for (l = 0; l < possibleHitpoints.size(); l++) {
+						pnt = possibleHitpoints.get(l);
+						if (!m_totalShotPoints.contains(pnt)) { 
+							fitsPattern = false;
+							break;
+						}
+					}
+					if (fitsPattern) {
+						touches = false;
+						for (l = 0; l < possibleHitpoints.size(); l++) {
+							pnt = possibleHitpoints.get(l);
+							if (checkSurrHits(pnt, 1) || !m_seekEdges && (pnt.x == 0 || pnt.y == 0 || pnt.x == m_fieldWidth - 1 || pnt.y == m_fieldWidth - 1)) {
+								touches = true;
+								break;
+							}
+						}
+						if (!touches) {
+							switch (shipType) {
+								case 1:
+									index = (int)Math.round(Math.random() * (possibleHitpoints.size() - 1));
+									break;
+								case 2:
+									index = 1;
+									break;
+								case 3:
+									switch (k) {
+										case 1:
+										case 2:
+											index = 1;
+											break;
+										case 3:
+										case 4:
+											index = 2;
+											break;
+									}
+									break;
+								case 4:
+								case 6:
+									index = 2;
+									break;
+								case 5:
+									if (k == 1) {
+										index = 3;
+									} else {
+										index = 4;
+									}
+									break;
+							}
+							shot = possibleHitpoints.get(index);
+							System.out.println("Firing Pattern Point: " + shot.toString() + " - index: " + index + " - shipType: " + shipType + " - direction: " + k + " - pattern: " + possibleHitpoints.toString());
+							return shot;
+						}
+					}
+				}
+			}
+			surroundingFields.clear();
+		}
+		return shot;
 	}
 	
 	private boolean addRowShotPoint(Point pnt) {
@@ -518,29 +636,31 @@ public class BattleShipsBotLogic {
 		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include edges (from 70%/65% on?)
 		6. give spaces touching existing (sunk) ships lower priority than those not touching - done
 		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships (see 6.) - done
-		8. implement pattern search to the end of game (from 65 - 60%?) (see 5.)
+		8. implement pattern search to the end of game (from 65 - 60%?) (see 5.) - working ...
 			- @65%: check for Battleships
 			- @60%: check for Subs, Destroyers
 			- @55%: (earlier, if no other ships left?) check for Frigate + Minesweeper: top 10 best points, 
 				check for those where either fits in all different positions/directions/shifted,
 				prioritize those with no adjacent sunk ships?
 			- look for areas with the least hitpoints (vs. shotpoints like in the other logic), get those points and do the checks
+			- ignore points adjacent to sunk ships
 		9. add priority to firing solutions (lower p. for those touching sunk ships) - done
 		10. every now and then, place a ship directly adjacent to another one ...
 		TODO: decrease regular random edge seek ... DONE
 		TODO: when priotizing surr. points, ignore content of m_hitPoints ... DONE
-		TODO: check bug with totalhitpoints vs. fieldhits, when looking for firing solutions
+		TODO: check bug with totalhitpoints vs. fieldhits, when looking for firing solutions ... none found ... ?
+		TODO: 1. use middle point of firing pattern 
+			  2. consider m_seekEdges when looking for pattern
 		
 		Goal: all ships found when 60% - 55% of fields are left
 		*/
-		Point pnt;
+		Point pnt = null;
 		int i, index;
 		int range;
 		ArrayList<BotShot> shotList = new ArrayList<BotShot>();
-        int percent = (int)Math.round((double)m_totalShotPoints.size() / (double)(m_fieldWidth * m_fieldWidth) * 100d);
+        int percent = getShotsLeftPercent();
 		int shipPercent = m_plEnemyScore.getActiveShipsFieldPercent();
 		double randomEdgeShot;
-		int matrixIndex;
 		BotShot botShot;
 		
 		if (percent > 89) // 89?
@@ -554,28 +674,37 @@ public class BattleShipsBotLogic {
 			m_seekEdges = true;
 		}
 		
-		randomEdgeShot = Math.random();
-		for (i = 0; i < 100; i++) {
-			index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
-			pnt = m_totalShotPoints.get(index);
-			if (percent > 63 || percent < 53 && percent > 43 || percent < 38) { // > 75? < 50
-				findSurrShots(pnt, shotList, range, randomEdgeShot);
-			} else {
-				seekShotCrossing(pnt, shotList, randomEdgeShot);
+		if (percent < 66) {
+			pnt = getFiringPatternShotPoint();
+			if (pnt == null) {
+				m_seekEdges = true;
 			}
-			//System.out.println("Point: " + pnt + " - Matrix size: " + matrix.size());
 		}
-		if (percent > 63 || percent < 53 && percent > 43 || percent < 38) {
-			Collections.sort(shotList, BotShot.PriorityAsc);
-			//shotList.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending		
-		} else {
-			Collections.sort(shotList, BotShot.PriorityDesc);
-			//shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
+
+		if (pnt == null) {
+			randomEdgeShot = Math.random();
+			for (i = 0; i < 100; i++) {
+				index = (int)Math.round(Math.random() * (m_totalShotPoints.size() - 1));
+				pnt = m_totalShotPoints.get(index);
+				if (percent > 63 || percent < 53) { // > 75? < 50
+					findSurrShots(pnt, shotList, range, randomEdgeShot);
+				} else {
+					seekShotCrossing(pnt, shotList, randomEdgeShot);
+				}
+				//System.out.println("Point: " + pnt + " - Matrix size: " + matrix.size());
+			}
+			if (percent > 63 || percent < 53) {
+				Collections.sort(shotList, BotShot.PriorityAsc);
+				//shotList.sort((o1, o2) -> Integer.compare(o1.getPriority(), o2.getPriority())); // ascending		
+			} else {
+				Collections.sort(shotList, BotShot.PriorityDesc);
+				//shotList.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority())); // descending		
+			}
+			botShot = shotList.get(0);
+			pnt = botShot.getShot();
 		}
-		botShot = shotList.get(0);
-		pnt = botShot.getShot();
+		System.out.println("Chosen Shot: " + pnt.toString() + " - percent: " + percent);
 		m_totalShotPoints.remove(pnt);
-		System.out.println("Chosen Shot: " + botShot + " - percent: " + percent);
 		//System.out.println("Shotlist: " + shotList.toString());
 		return pnt;
 	}

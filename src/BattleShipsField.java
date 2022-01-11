@@ -335,13 +335,29 @@ public class BattleShipsField extends Container {
 	public void addTestShips() {
 		BattleShip ship;
 		m_bsShipPattern = new BattleShip[m_iMaxShipType];
-		ship = addShip(new BattleShip(4, 3, true));
+
+		ship = addShip(new BattleShip(4, 1, true));
 		ship.setPosition(1, 1);
+		ship.setDirection(1);
+		m_bsShipPattern[0] = ship;
+		
+		ship = addShip(new BattleShip(4, 2, true));
+		ship.setPosition(3, 1);
+		ship.setDirection(1);
+		m_bsShipPattern[1] = ship;
+		
+		ship = addShip(new BattleShip(4, 3, true));
+		ship.setPosition(5, 1);
 		ship.setDirection(1);
 		m_bsShipPattern[2] = ship;
 		
+		ship = addShip(new BattleShip(4, 4, true));
+		ship.setPosition(8, 1);
+		ship.setDirection(1);
+		m_bsShipPattern[3] = ship;
+		
 		ship = addShip(new BattleShip(4, 5, true));
-		ship.setPosition(4, 1);
+		ship.setPosition(10, 1);
 		ship.setDirection(1);
 		m_bsShipPattern[4] = ship;
 	}
