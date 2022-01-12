@@ -389,7 +389,7 @@ public class BattleShipsBotLogic {
 		}
 		for (i = 0; i < m_hitPoints.size(); i++) {
 			pnt = m_hitPoints.get(i);
-			fillNextShotPoints(pnt, surroundingFields, true, true, range);
+			fillNextShotPoints(pnt, surroundingFields, range);
 			for (j = 0; j < surroundingFields.size(); j++) {
 				pnt = surroundingFields.get(j);
 				shipPattern.setPosition(pnt.x, pnt.y);
@@ -429,7 +429,7 @@ public class BattleShipsBotLogic {
 								}
 								botShot = new BotShot(priority, possibleHitpoints);
 								m_firingSolutions.add(botShot);
-								//System.out.println("Added firing solution: " + botShot.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
+								System.out.println("Added firing solution: " + botShot.toString() + " - direction: " + k + " - position: " + pnt.toString() + " - current hitpoints: " + m_hitPoints.toString());
 							}
 						}
 					}
@@ -503,7 +503,7 @@ public class BattleShipsBotLogic {
 		
 		for (i = 0; i < m_fieldWidth * m_fieldWidth / 2; i++) {
 			pnt = shotList.get(i).getShot();
-			fillNextShotPoints(pnt, surroundingFields, true, true, range);
+			fillNextShotPoints(pnt, surroundingFields, range);
 			for (j = 0; j < surroundingFields.size(); j++) {
 				pnt = surroundingFields.get(j);
 				shipPattern.setPosition(pnt.x, pnt.y);
@@ -560,7 +560,7 @@ public class BattleShipsBotLogic {
 									break;
 							}
 							shot = possibleHitpoints.get(index);
-							System.out.println("Firing Pattern Point: " + shot.toString() + " - index: " + index + " - shipType: " + shipType + " - direction: " + k + " - pattern: " + possibleHitpoints.toString());
+							System.out.println("Firing Pattern Point: " + shot.toString() + " - shipType: " + shipType + " - found after: " + (i * j) + " - index: " + index + " - direction: " + k + " - pattern: " + possibleHitpoints.toString());
 							return shot;
 						}
 					}
@@ -636,21 +636,21 @@ public class BattleShipsBotLogic {
 		5. towards the end (ie. only little space left for ships), add pattern search for still existing ships, include edges (from 70%/65% on?)
 		6. give spaces touching existing (sunk) ships lower priority than those not touching - done
 		7. lower priority/bias of shotpoints adjacent (even diagonal) to sunk ships (see 6.) - done
-		8. implement pattern search to the end of game (from 65 - 60%?) (see 5.) - working ...
+		8. implement pattern search to the end of game (from 65 - 60%?) (see 5.) - done
 			- @65%: check for Battleships
 			- @60%: check for Subs, Destroyers
 			- @55%: (earlier, if no other ships left?) check for Frigate + Minesweeper: top 10 best points, 
 				check for those where either fits in all different positions/directions/shifted,
 				prioritize those with no adjacent sunk ships?
-			- look for areas with the least hitpoints (vs. shotpoints like in the other logic), get those points and do the checks
-			- ignore points adjacent to sunk ships
+			- look for areas with the least hitpoints (vs. shotpoints like in the other logic), get those points and do the checks - nope
+			- ignore points adjacent to sunk ships - done
 		9. add priority to firing solutions (lower p. for those touching sunk ships) - done
 		10. every now and then, place a ship directly adjacent to another one ...
-		TODO: decrease regular random edge seek ... DONE
-		TODO: when priotizing surr. points, ignore content of m_hitPoints ... DONE
+		TODO: decrease regular random edge seek ... - done
+		TODO: when priotizing surr. points, ignore content of m_hitPoints ... - done
 		TODO: check bug with totalhitpoints vs. fieldhits, when looking for firing solutions ... none found ... ?
-		TODO: 1. use middle point of firing pattern 
-			  2. consider m_seekEdges when looking for pattern
+		TODO: 1. use middle point of firing pattern - done
+			  2. consider m_seekEdges when looking for pattern - done
 		
 		Goal: all ships found when 60% - 55% of fields are left
 		*/
@@ -790,22 +790,16 @@ public class BattleShipsBotLogic {
 		//System.out.println("surrShotPoints: " + surrShotPoints.toString());
 	}
 
-	private void fillNextShotPoints(Point shot, ArrayList<Point> nextShotPoints, boolean addSourcePoint, boolean ignoreSpentShots, int range) {
+	private void fillNextShotPoints(Point shot, ArrayList<Point> nextShotPoints, int range) {
 		int x, y, i;
 		Point pnt;
 		SeekBounds bounds = new SeekBounds(shot, range, m_fieldWidth);
 		
-		if (addSourcePoint) {
-			if (ignoreSpentShots || containsShotPoint(shot) && !nextShotPoints.contains(shot)) {
-				nextShotPoints.add(shot);
-			}
-		}
+		nextShotPoints.add(shot);
 		for (x = bounds.getStartX(); x <= bounds.getEndX(); x++) {
 			for (y = bounds.getStartY(); y <= bounds.getEndY(); y++) {
 				pnt = new Point(x, y);
-				if (ignoreSpentShots || containsShotPoint(pnt) && !nextShotPoints.contains(pnt)) {
-					nextShotPoints.add(pnt);
-				}
+				nextShotPoints.add(pnt);
 			}
 		}
 	}
@@ -907,9 +901,6 @@ public class BattleShipsBotLogic {
 		priority += yDown - 1;
 		yBias = yUp + yDown + 1 - Math.abs(xLeft - xRight);
 		//System.out.println("yBias: " + yBias);
-		if (!m_seekEdges && randomEdgeShot > EDGE_SHOT_PROBABILITY && (shot.x == 0 || shot.y == 0 || shot.x == m_fieldWidth - 1 || shot.y == m_fieldWidth - 1)) {
-			//priority -= 4;
-		}
 		if (checkSurrHits(shot, 1)) {
 			priority = 1;
 		}
