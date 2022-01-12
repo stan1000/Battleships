@@ -28,8 +28,8 @@ public class BattleShipsServerApplication extends Thread {
 	private PrintWriter m_bwLog;
 	
 	public static void main(String[] args) throws IOException {
-		boolean runAsDaemon = false;
-		if (args.length > 0 && args[0].equals("Daemon")) runAsDaemon = true;
+		CliArgs cliArgs = new CliArgs(args);
+		boolean runAsDaemon = cliArgs.switchPresent("-daemon");
 		BattleShipsServerApplication oServerCon = new BattleShipsServerApplication(runAsDaemon);
 	}
 
