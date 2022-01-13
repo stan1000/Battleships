@@ -124,6 +124,8 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 	}
 
 	public void setWindowTitle(String title) {
+		if (title.equals(""))
+			title = DEFAULT_PLAYER_NAME;
 		setTitle(title);
 	}
 
