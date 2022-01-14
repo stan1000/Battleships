@@ -1,1 +1,1 @@
-java BattleShipsBot %1 %2 %3 %4
+java BattleShipsBot -debug

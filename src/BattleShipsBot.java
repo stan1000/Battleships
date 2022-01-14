@@ -45,11 +45,13 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		boolean isVisible;
 		boolean autoBot;
 		CliArgs cliArgs = new CliArgs(args);
+		boolean debug;
 		
 		isVisible = !cliArgs.switchPresent("-invisible");
 		playerName = cliArgs.switchValue("-name", DEFAULT_PLAYER_NAME);
 		m_serverName =  cliArgs.switchValue("-server", DEFAULT_SERVER);
 		autoBot = cliArgs.switchPresent("-autobot");
+		debug = cliArgs.switchPresent("-debug");
 		m_oUtil = new BattleShipsUtility();
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
@@ -57,7 +59,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 			setResizable(false);
 			setTitle(playerName);
 			enableEvents(AWTEvent.WINDOW_EVENT_MASK);
-			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(true));
+			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(true, debug));
 			if (isVisible) {
 				setVisible(true);
 				setSize(640, 480);

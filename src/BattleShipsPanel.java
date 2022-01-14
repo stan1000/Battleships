@@ -118,13 +118,15 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_gameOver;
 	private boolean m_botPaused;
 	private boolean m_autoBot;
+	private boolean m_debug;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
 	
-	public BattleShipsPanel(boolean bClientOnly) {
+	public BattleShipsPanel(boolean bClientOnly, boolean debug) {
 		m_bClientOnly = bClientOnly;
 		m_autoBot = false;
+		m_debug = debug;
 	}
 	
 	public void init() {
@@ -221,7 +223,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlInfo.setBackground(Color.white);
 		m_oPlInfo.setForeground(Color.black);
 		m_oPlInfo.setColorShip(m_oColShip);
-		m_oPlInfo.setImageShipSegment(buildShipSegment(m_oColShip, 14));
 		m_oPlInfo.setVisible(false);
 
 		m_cntSelectEnemy = (TextDisplayPanel)m_oCntMain.add(new TextDisplayPanel());
@@ -306,6 +307,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlMyShips.setColorShipSunk(m_oColShipSunk);
 		m_oPlMyShips.setColorShipHitMark(oColShipHitMark);
 		m_oPlMyShips.setColorShipHighlight(oColShipHighlight);
+		m_oPlMyShips.setDebug(m_debug);
 		
 		m_oPlMyScore = (BattleShipsField)m_oCntMain.add(new BattleShipsField(BattleShipsUtility.MAX_SHIP_TYPE, BattleShipsField.FIELD_TYPE_SCORE));
 		m_oPlMyScore.setBackground(oColField);
@@ -338,6 +340,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlEnemyShips.setColorShipSunk(m_oColShipSunk);
 		m_oPlEnemyShips.setColorShipHitMark(oColShipHitMark);
 		m_oPlEnemyShips.setShootCursor(oShootCursor);
+		m_oPlEnemyShips.setDebug(m_debug);
 
 		m_oPlEnemyScore = (BattleShipsField)m_oCntMain.add(new BattleShipsField(BattleShipsUtility.MAX_SHIP_TYPE, BattleShipsField.FIELD_TYPE_SCORE));
 		m_oPlEnemyScore.setBackground(oColField);
@@ -561,12 +564,16 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		Image oImgShipSegment;
 		Image oImgShipSegmentSunk;
 		boolean bRet = true;
+		int infoCellWidth = Math.round(m_iCellWidth * 77 / 100);
+		if (infoCellWidth < 14)
+			infoCellWidth = 14;
 		
 		oImgShipSegment = buildShipSegment(m_oColShip, m_iCellWidth);
 		oImgShipSegmentSunk = buildShipSegment(m_oColShipSunk, m_iCellWidth);
 		m_oLblMyShips.setLocation(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING);
 		m_oPlInfo.removeAllShips();
-		m_oPlInfo.init(14, 14);
+		m_oPlInfo.init(infoCellWidth, 14);
+		m_oPlInfo.setImageShipSegment(buildShipSegment(m_oColShip, infoCellWidth));
 		m_oPlMyShips.removeAllShips();
 		m_oPlMyShips.init(m_iCellWidth, m_iFieldWidth);
 		m_oPlMyShips.setImageShipSegment(oImgShipSegment);
@@ -965,7 +972,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			reset();
 			setStatus(getString("NewGame"));
 			if (m_isBot) {
-				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_debug);
+				m_Ai.setTestShipsPanel(m_plTestShips);
+				m_Ai.setEnemyScorePanel(m_oPlEnemyScore);
 				m_oPlMyShips.setShipsRandomPosition();
 				m_botPaused = false;
 			}
@@ -1278,7 +1287,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			}
 		} else {
 			if (m_isBot) {
-				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_plTestShips, m_oPlEnemyScore);
+				m_Ai = new BattleShipsBotLogic(m_iFieldWidth, m_debug);
+				m_Ai.setTestShipsPanel(m_plTestShips);
+				m_Ai.setEnemyScorePanel(m_oPlEnemyScore);
 				m_botPaused = false;
 			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
@@ -1415,19 +1426,22 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 
 	//**public void GameOver_TimerEvent() {
 	public void i_b() {
-		if (m_isBot && m_autoBot) {
-			setReady();
-			m_botPaused = false;
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {}
-			if (!m_botPaused)
+		if (m_isBot) {
+			if (m_autoBot) {
 				setReady();
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {}
-			if (!m_botPaused)
-				shootBot();
+				m_botPaused = false;
+				m_oPlMyShips.setShipsRandomPosition();
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {}
+				if (!m_botPaused)
+					setReady();
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {}
+				if (!m_botPaused)
+					shootBot();
+			}
 		} else {
 			if (m_bPlaySound) playAudioClip(m_oAuGameOver);
 			m_oPlEnemyShips.showEnemyShips();

@@ -46,11 +46,11 @@ public class BattleShipsField extends Container {
 	private Cursor m_bShootCursor;
 	private BattleShip[] m_bsShipPattern;
 	private int[] m_activeShips;
+	private boolean m_debug;
 	
 	public static final int FIELD_TYPE_ME = 1;
 	public static final int FIELD_TYPE_ENEMY = 2;
 	public static final int FIELD_TYPE_SCORE = 3;
-	private static final boolean DEBUG = true;
 
 	public BattleShipsField(int iMaxShipType, int iFieldType) {
 		m_iMaxShipType = iMaxShipType;
@@ -62,6 +62,7 @@ public class BattleShipsField extends Container {
 		}
 		m_bPlaying = false;
 		m_iSunkCount = 0;
+		m_debug = false;
 		m_alShots = new CopyOnWriteArrayList<Point>();
 		m_alBattleShips = new ArrayList<BattleShip>();
 		m_iShipTypeCount = new int[m_iMaxShipType];
@@ -81,7 +82,7 @@ public class BattleShipsField extends Container {
 		if (g == null) return;
 		g.setColor(oColor);
 		g.fillRect(oPoint.x * m_iCellWidth + 1, oPoint.y * m_iCellWidth + 1, m_iCellWidth - 1, m_iCellWidth - 1);
-		if (DEBUG) {
+		if (m_debug) {
 			if (oPoint.x == 0) {
 				g.setColor(getForeground());
 				g.drawString(String.valueOf(oPoint.y), 2, oPoint.y * m_iCellWidth + Math.round(m_iCellWidth / 2) + 5);
@@ -129,6 +130,10 @@ public class BattleShipsField extends Container {
 		m_bShootCursor = bShootCursor;
 	}
 	
+	public void setDebug(boolean debug) {
+		m_debug = debug;
+	}
+	
 	public void paint(Graphics g) {
 		if (g == null) return;
 		Dimension oReDim = getSize();
@@ -164,7 +169,7 @@ public class BattleShipsField extends Container {
 				}
 				paintShot(g, oPoint, oColShotMark);
 			}
-			if (DEBUG) {
+			if (m_debug) {
 				g.setColor(getForeground());
 				for (i = 1; i <= iNumLines; i++) {
 					g.drawString(String.valueOf(i - 1), 2, i * m_iCellWidth - Math.round(m_iCellWidth / 2) + 5);

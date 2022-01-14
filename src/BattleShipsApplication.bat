@@ -1,1 +1,1 @@
-java BattleShipsApplication
+java BattleShipsApplication -debug

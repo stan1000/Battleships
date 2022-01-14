@@ -38,10 +38,12 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 	private final static String COOKIE_FILE = "cookies.txt";
 
 	public static void main(String[] args) {
-		BattleShipsApplication oApp = new BattleShipsApplication();
+		BattleShipsApplication oApp = new BattleShipsApplication(args);
 	}
 	
-	public BattleShipsApplication() {
+	public BattleShipsApplication(String[] args) {
+		CliArgs cliArgs = new CliArgs(args);
+		boolean debug = cliArgs.switchPresent("-debug");
 		m_oUtil = new BattleShipsUtility();
 		m_propCookies = new Properties();
 		m_cl = this.getClass().getClassLoader();
@@ -52,7 +54,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 			setResizable(false);
 			setTitle(getParameter("String_Title"));
 			enableEvents(AWTEvent.WINDOW_EVENT_MASK);
-			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(false));
+			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(false, debug));
 			setVisible(true);
 			setSize(640, 480);
 			m_oBtlShips.init();
