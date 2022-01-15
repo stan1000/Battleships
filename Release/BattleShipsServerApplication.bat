@@ -1,1 +1,1 @@
-java -classpath .\;BattleShips.jar BattleShipsServerApplication
+java -cp BattleShips.jar BattleShipsServerApplication
