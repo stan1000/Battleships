@@ -115,10 +115,12 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_connectToFirstPlayer;
 	private boolean m_isBot;
 	private BattleShipsBotLogic m_Ai;
+	private TheTimerTask m_tmrTimeOut;
 	private boolean m_gameOver;
 	private boolean m_botPaused;
 	private boolean m_autoBot;
 	private boolean m_debug;
+	private int m_timeOutSeconds;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -152,6 +154,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		GfxAnimatedButton btnOk;
 		GfxAnimatedButton btnCancel;
 		int xLoc;
+		int statePanelFontSize;
 		
 		setLayout(null);
 		setBackground(Color.white);
@@ -173,6 +176,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_connectToFirstPlayer = false;
 		m_gameOver = true;
 		m_botPaused = true;
+		m_timeOutSeconds = 0;
 
 		// get external config parms
 		m_iCellWidth = parseIntParm("CellWidth", 10);
@@ -284,12 +288,13 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_cntModalMask.addMouseListener(new TheMouseAdapter((Object)this, "dummy"));
 		m_cntModalMask.setVisible(false);
 		
+		statePanelFontSize = (int)Math.round(m_iCellWidth * m_iFieldWidth / 100d * 12.5d);
 		m_oCntState = (StateDisplayPanel)m_oCntMain.add(new StateDisplayPanel());
 		m_oCntState.setBackground(Color.white);
-		m_oCntState.setFont(new Font("SansSerif", Font.BOLD, 40));
+		m_oCntState.setFont(new Font("SansSerif", Font.BOLD, statePanelFontSize));
 		m_oCntState.setBounds(1, 1, 1, 1);
 		m_oCntState.setVisible(false);
-		
+
 		m_oLblMyShips = (TextDisplayPanel)m_oCntMain.add(new TextDisplayPanel());
 		m_oLblMyShips.setFont(oFntMainFont);
 		m_oLblMyShips.setText(getString("MyShips"), TextDisplayPanel.AUTO_RESIZE);
@@ -314,7 +319,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlMyScore.setForeground(oColFieldLines);
 		m_oPlMyScore.setColorShip(m_oColShip);
 		m_oPlMyScore.setColorShipSunk(m_oColShipSunk);
-		m_oPlMyScore.init(3, 68);
+		m_oPlMyScore.init(4, 68);
 		
 		m_oLblEnemyShips = (TextDisplayPanel)m_oCntMain.add(new TextDisplayPanel());
 		m_oLblEnemyShips.setFont(oFntMainFont);
@@ -347,7 +352,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oPlEnemyScore.setForeground(oColFieldLines);
 		m_oPlEnemyScore.setColorShip(m_oColShip);
 		m_oPlEnemyScore.setColorShipSunk(m_oColShipSunk);
-		m_oPlEnemyScore.init(3, 68);
+		m_oPlEnemyScore.init(4, 68);
 		
 		if (m_isBot) {
 			m_plTestShips = (BattleShipsField)m_oCntMain.add(new BattleShipsField(BattleShipsUtility.MAX_SHIP_TYPE, BattleShipsField.FIELD_TYPE_ME));
@@ -567,6 +572,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		int infoCellWidth = Math.round(m_iCellWidth * 77 / 100);
 		if (infoCellWidth < 14)
 			infoCellWidth = 14;
+		int scoreFieldHeight = 28; //old 21 - recalc all number :-(((
+		
 		
 		oImgShipSegment = buildShipSegment(m_oColShip, m_iCellWidth);
 		oImgShipSegmentSunk = buildShipSegment(m_oColShipSunk, m_iCellWidth);
@@ -613,7 +620,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		
 		iFieldDim = m_oPlMyShips.getSize().width;
 		if (iFieldDim < 230) iFieldDim = 230;
-		iHeight = iFieldDim + VERT_BORDER_PADDING + 226;
+		iHeight = iFieldDim + VERT_BORDER_PADDING + scoreFieldHeight + 205;
 		iWidth = iFieldDim * 2 + HORIZ_BORDER_PADDING * 3;
 		oParent.setSize(iWidth, iHeight + iTop);
 		setBounds(0, iTop, iWidth, iHeight);
@@ -622,21 +629,21 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oGfxBtnInfo.setLocation(HORIZ_BORDER_PADDING + iFieldDim - 16, VERT_BORDER_PADDING);
 		m_oPlInfo.addShipsAndInfo();
 		m_oPlInfo.setLocation(m_oPlInfo.getLocation().x, VERT_BORDER_PADDING + 19 + Math.round(m_iCellWidth / 2));
-		m_oPlMyScore.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 18, iFieldDim, 21);
+		m_oPlMyScore.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 18, iFieldDim, scoreFieldHeight);
 		m_oLblEnemyShips.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING);
 		m_oBtnToggleSound.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15 + (iFieldDim - 16), VERT_BORDER_PADDING);
 		m_oPlEnemyShips.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + 19);
-		m_oPlEnemyScore.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + 18, iFieldDim, 21);
-		m_oBtnReady.setLocation(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 43);
-		m_oBtnToggleHideShips.setLocation(HORIZ_BORDER_PADDING + iFieldDim - (m_oFntMetrMain.stringWidth(m_oBtnToggleHideShips.getLabel()) + 15), VERT_BORDER_PADDING + iFieldDim + 43);
-		m_oLblStatus.setLocation(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 71);
+		m_oPlEnemyScore.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + 18, iFieldDim, scoreFieldHeight);
+		m_oBtnReady.setLocation(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 22);
+		m_oBtnToggleHideShips.setLocation(HORIZ_BORDER_PADDING + iFieldDim - (m_oFntMetrMain.stringWidth(m_oBtnToggleHideShips.getLabel()) + 15), VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 22);
+		m_oLblStatus.setLocation(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 50);
 		m_oLblScore.setText(getString("You") + ":00 " + getString("Enemy") + ":00");
-		m_oLblScore.setBounds(HORIZ_BORDER_PADDING + iFieldDim - (oFntMetrScore.stringWidth(m_oLblScore.getText()) + 5), VERT_BORDER_PADDING + iFieldDim + 73, oFntMetrScore.stringWidth(m_oLblScore.getText()) + 5, oFntMetrScore.getHeight());
-		m_oTxtStatus.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 90, iFieldDim, 82);
-		m_oLblChat.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + 41);
-		m_oTxtChatInput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + 60, iFieldDim, iFontHeightChat);
-		m_oTxtChatOutput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + iFontHeightChat + 61, iFieldDim, 112 - iFontHeightChat);
-		m_oPnlConnect.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + 177, iFieldDim * 2 + 15, iFontHeight * 2);
+		m_oLblScore.setBounds(HORIZ_BORDER_PADDING + iFieldDim - (oFntMetrScore.stringWidth(m_oLblScore.getText()) + 5), VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 52, oFntMetrScore.stringWidth(m_oLblScore.getText()) + 5, oFntMetrScore.getHeight());
+		m_oTxtStatus.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 69, iFieldDim, 82);
+		m_oLblChat.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 20);
+		m_oTxtChatInput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 39, iFieldDim, iFontHeightChat);
+		m_oTxtChatOutput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + iFontHeightChat + scoreFieldHeight + 40, iFieldDim, 112 - iFontHeightChat);
+		m_oPnlConnect.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 156, iFieldDim * 2 + 15, iFontHeight * 2);
 		m_oCbClient.setSize(m_oFntMetrMain.stringWidth(m_oCbClient.getLabel()) + 20, iFontHeight);
 		m_oCbServer.setSize(m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 20, iFontHeight);
 		m_oTxtServer.setBounds(0, iFontHeight - 2, 170, iFontHeightChat);
@@ -671,6 +678,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	public void setIsBot(boolean value, boolean autoBot) {
 		m_isBot	= value;
 		m_autoBot = autoBot;
+	}
+	
+	public void setTimeOutSeconds(int timeOutSeconds) {
+		m_timeOutSeconds = timeOutSeconds;
 	}
 	
 	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {
@@ -791,7 +802,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		FontMetrics oFntMetrScore = m_oCntMain.getFontMetrics(m_oLblScore.getFont());
 		int width = oFntMetrScore.stringWidth(m_oLblScore.getText());
 		int fieldDim = m_oPlMyShips.getSize().width;
-		m_oLblScore.setBounds(HORIZ_BORDER_PADDING + fieldDim - (width + 5), VERT_BORDER_PADDING + fieldDim + 73, width + 5, oFntMetrScore.getHeight());
+		m_oLblScore.setBounds(HORIZ_BORDER_PADDING + fieldDim - (width + 5), VERT_BORDER_PADDING + fieldDim + m_oPlMyScore.getSize().height + 52, width + 5, oFntMetrScore.getHeight());
 	}
 	
 	private void setStatus(String sMessage) {
@@ -950,10 +961,12 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	public void socketDataArrived(String sMessage, String sData) {
 		//System.out.println("starting socketDataArrived(" + sMessage + ", " + sData + ")");
 		StringTokenizer oStrToken = null;
+		boolean refreshTimeOut = false;
 		if (sMessage.equals("shoot")) {
 			oStrToken = new StringTokenizer(sData, ";");
 			Point oPoint = new Point(Integer.parseInt(oStrToken.nextToken()), Integer.parseInt(oStrToken.nextToken()));
 			m_oPlMyShips.shoot(oPoint);
+			refreshTimeOut = true;
 		} else if (sMessage.equals("shipinfo")) {
 			m_oPlEnemyShips.addAllEnemyShips(m_oCryptUtil.decode(sData));
 			setStatusCondName("EnemyReady");
@@ -968,6 +981,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				} catch (InterruptedException e) {}
 				setReady();
 			}
+			refreshTimeOut = true;
 		} else if (sMessage.equals("newgame")) {
 			reset();
 			setStatus(getString("NewGame"));
@@ -978,12 +992,14 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_oPlMyShips.setShipsRandomPosition();
 				m_botPaused = false;
 			}
+			refreshTimeOut = true;
 		} else if (sMessage.equals("chat")) {
 			if (!m_enemyPlayerName.equals("")) {
 				m_oTxtChatOutput.append(m_enemyPlayerName + "> " + sData + "\n");
 			} else {
 				m_oTxtChatOutput.append(getString("Enemy") + "> " + sData + "\n");
 			}
+			refreshTimeOut = true;
 		} else if (sMessage.equals("serverresponse")) {
 			m_oTxtChatOutput.append(getString("Server") + "> " + sData + "\n");
 		} else if (sMessage.equals("config")) {
@@ -998,6 +1014,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			if (!m_bIsClient) {
 				startServer();
 			}
+			if (m_tmrTimeOut != null) m_tmrTimeOut.interrupt();
 		} else if (sMessage.equals("playernameset")) {
 			m_playerName = sData;
 			setCookie("PlayerName", m_playerName);
@@ -1008,6 +1025,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			m_oTxtChatOutput.append(getString("Server") + "> " + getString("PlayerNameExists") + ": " + sData + "\n");
 			stopConnect();
 			setStatus(getString("Disconnected"));
+			if (m_tmrTimeOut != null) m_tmrTimeOut.interrupt();
 		} else if (sMessage.equals("clientlistupdate")) {
 			m_connWithDedicatedServer = true;
 			updatePlayerList(sData);
@@ -1030,6 +1048,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_oPlMyShips.setShipsRandomPosition();
 			}
 			setEnemyFound();
+			refreshTimeOut = true;
 		} else if (sMessage.equals("status")) {
 			if (sData.equals("Connected")) {
 				setStatus(getString("Connected"));
@@ -1056,6 +1075,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			} else if (sData.equals("EnemyFound")) {
 				setStatus(getString("EnemyFound"));
 				setEnemyFound();
+				refreshTimeOut = true;
 			} else if (sData.equals("EnemyChanged")) {
 				reset();
 				m_oBtnReady.setEnabled(true);
@@ -1065,6 +1085,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				setStatus(getString("EnemyLeft"));
 				appendStatus(getString("NewEnemy"));
 				if (m_bPlaySound) playAudioClip(m_oAuConnect);
+				refreshTimeOut = true;
 			} else if (sData.equals("EnemyLeft")) {
 				reset();
 				m_oBtnReady.setEnabled(false);
@@ -1078,10 +1099,22 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_btnDisconnectEnemy.setVisible(false);
 				appendStatus(getString("Waiting"));
 				m_enemyPlayerName = "";
+				if (m_tmrTimeOut != null) m_tmrTimeOut.interrupt();
 			}
+		}
+		if (m_isBot && refreshTimeOut) {
+			refreshTimeOut();
 		}
 		//System.out.println("finished socketDataArrived()");
 		//m_oTxtStatus.setText(sMessage + ": " + sData);
+	}
+	
+	private void refreshTimeOut() {
+		if (m_tmrTimeOut != null) m_tmrTimeOut.interrupt();
+		if (m_timeOutSeconds > 0) {
+			m_tmrTimeOut = new TheTimerTask((Object)this, "tu");
+			m_tmrTimeOut.start(m_timeOutSeconds * 1000, 0);
+		}
 	}
 	
 	private void toggleConfirmation(String message) {
@@ -1291,6 +1324,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_Ai.setTestShipsPanel(m_plTestShips);
 				m_Ai.setEnemyScorePanel(m_oPlEnemyScore);
 				m_botPaused = false;
+				refreshTimeOut();
 			}
 			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
 			if (oPntShips != null) {
@@ -1447,6 +1481,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			m_oPlEnemyShips.showEnemyShips();
 			m_oCntState.start();
 		}
+	}
+	
+	//**public void TimeOut_TimerEvent() {
+	public void tu_b() {
+		sendMessage("disconnectenemy", "");
 	}
 	
 	//**public void BtnToggleServer_MouseClicked(MouseEvent event) {

@@ -35,6 +35,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 	// Gotta declare "static" due to bug in obfuscator. Ah, well ...
 	private final static String DEFAULT_SERVER = "localhost";
 	private final static String DEFAULT_PLAYER_NAME = "BattleshipsBot";
+	private final static int DEFAULT_BOT_TIMEOUT_SECONDS = 600;
 
 	public static void main(String[] args) {
 		BattleShipsBot oApp = new BattleShipsBot(args);
@@ -46,12 +47,18 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		boolean autoBot;
 		CliArgs cliArgs = new CliArgs(args);
 		boolean debug;
+		int timeOutSeconds;
 		
 		isVisible = !cliArgs.switchPresent("-invisible");
 		playerName = cliArgs.switchValue("-name", DEFAULT_PLAYER_NAME);
 		m_serverName =  cliArgs.switchValue("-server", DEFAULT_SERVER);
 		autoBot = cliArgs.switchPresent("-autobot");
 		debug = cliArgs.switchPresent("-debug");
+		try {
+			timeOutSeconds =  cliArgs.switchIntValue("-timeout", DEFAULT_BOT_TIMEOUT_SECONDS);
+		} catch (NumberFormatException e) {
+			timeOutSeconds = DEFAULT_BOT_TIMEOUT_SECONDS;
+		}
 		m_oUtil = new BattleShipsUtility();
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
@@ -67,6 +74,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 			m_oBtlShips.setIsBot(true, autoBot);
 			m_oBtlShips.init();
 			m_oBtlShips.setPlayerName(playerName);
+			m_oBtlShips.setTimeOutSeconds(timeOutSeconds);
 		} else {
 			System.err.println(m_oUtil.getErrorMessage());
 			System.exit(1);

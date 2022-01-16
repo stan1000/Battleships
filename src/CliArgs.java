@@ -64,6 +64,17 @@ public class CliArgs {
         return defaultValue;
     }
 
+    public int switchIntValue(String switchName) {
+        return switchIntValue(switchName, 0);
+    }
+
+    public int switchIntValue(String switchName, int defaultValue) {
+        String switchValue = switchValue(switchName, null);
+
+        if(switchValue == null) return defaultValue;
+        return Integer.parseInt(switchValue);
+    }
+
     public Long switchLongValue(String switchName) {
         return switchLongValue(switchName, null);
     }
