@@ -80,7 +80,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 				m_sFreeSocketIdentifier = "";
 				log(MessageFormat.format(getString("ServerStarting"), 
 										 new Object[]{BattleShipsUtility.VERSION, Integer.toString(m_iPort)}));
-
+				log(getString("Configuration") + " " + m_sCurrentConfig);
 				boolean bUseWebServer = (m_oUtil.parseIntParm("UseWebServer", 0) == 1 ? true : false);
 				boolean bWebServerLog = (m_oUtil.parseIntParm("WebServerLog", 0) == 1 ? true : false);
 				int iWebServerPort = m_oUtil.parseIntParm("WebServerPort", 80);
@@ -134,6 +134,8 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 		if (DEBUG) System.out.println("socketDataArrived: " + sMessage + " - " + sData + " ID: " + sSocketIdentifier);
 		String sMappedSocketIdentifier;
 		BattleShipsConnection oSchSocket;
+		String player1, player2;
+		StringTokenizer strToken;
 		if (sMessage.equals("disconnected")) {
 			handleDisconnect(sSocketIdentifier);
 		} else if (sMessage.equals("status")) {
@@ -170,7 +172,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 					oSchSocket = (BattleShipsConnection)m_oHtBattleShipsConnection.get(sSocketIdentifier);
 					sendMessage("enemyfound", oSchSocket.getPlayerName(), sMappedSocketIdentifier);
 					broadcastClientList();
-					log(getString("ClientsConnected") + " " + sSocketIdentifier + " - " + sMappedSocketIdentifier);
+					log(getString("ClientsConnected") + " " + getPlayerNameById(sSocketIdentifier) + " - " + sData);
 				}
 			}
 		} else if (sMessage.equals("disconnectenemy")) {
@@ -182,9 +184,15 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 					sleep(100);
 				} catch (InterruptedException e) {}
 				sendMessage("status", "EnemyLeft", sSocketIdentifier);
-				log(getString("ClientsDisconnected") + " " + sSocketIdentifier + " - " + sMappedSocketIdentifier);
+				log(getString("ClientsDisconnected") + " " + getPlayerNameById(sSocketIdentifier) + " - " + getPlayerNameById(sMappedSocketIdentifier));
 			}
 			broadcastClientList();
+		} else if (sMessage.equals("gameresult")) {
+			player1 = getPlayerNameById(sSocketIdentifier);
+			sMappedSocketIdentifier = (String)m_oHtClientMapping.get(sSocketIdentifier);
+			player2 = getPlayerNameById(sMappedSocketIdentifier);
+			strToken = new StringTokenizer(sData, ";");
+			log(getString("GameResult") + " " + player1 + " - " + player2 + ": " + strToken.nextToken() + " - " + strToken.nextToken());
 		} else {
 			//if (DEBUG) System.out.println("Server::socketDataArrived: " + sMessage + " - " + sData + "ID: " + sSocketIdentifier);
 			if (sMessage.equals("chat")) {
@@ -395,6 +403,11 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 				System.out.println("Sending msg to " + sSocketIdentifier);
 			}
 		}
+	}
+	
+	public String getPlayerNameById(String socketId) {
+		BattleShipsConnection socket = (BattleShipsConnection)m_oHtBattleShipsConnection.get(socketId);
+		return socket.getPlayerName();
 	}
 	
 	public String getString(String sKey) {

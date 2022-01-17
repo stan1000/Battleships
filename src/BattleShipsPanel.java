@@ -751,7 +751,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			setScore();
 			sStatus += "\n" + sTmp;
 			setStatus(sStatus);
-			if (bEnemy) sendMessage("shoot", oPoint.x + ";" + oPoint.y);
+			if (bEnemy) {
+				sendMessage("shoot", oPoint.x + ";" + oPoint.y);
+				sendMessage("gameresult", m_oPntScore.x + ";" + m_oPntScore.y);
+			}
 		} else {
 			setStatus(sStatus);
 			if (!bHit) {
