@@ -385,34 +385,53 @@ public class BattleShipsField extends Container {
 	
 	public void setShipsRandomPosition(boolean touchEdge, boolean noTouching) {
 		BattleShip oBattleShip = null;
-		ListIterator<BattleShip> list = m_alBattleShips.listIterator();
+		ListIterator<BattleShip> list;
 		int iXPos = 0;
 		int iYPos = 0;
 		int iDirection;
 		int width = 0;
 		int height = 0;
-		int randomCounter;
-		
-		while (list.hasNext()) {
-			randomCounter = 0;
-			oBattleShip = list.next();
-			do {
-				iDirection = (int)Math.round(Math.random() * 3) + 1;
-				oBattleShip.setDirection(iDirection);
-				width = oBattleShip.getSize().width / m_iCellWidth;
-				height = oBattleShip.getSize().height / m_iCellWidth;
-				iXPos = (int)Math.round(Math.random() * (m_iFieldWidth - width));
-				iYPos = (int)Math.round(Math.random() * (m_iFieldWidth - height));
-				oBattleShip.setPosition(iXPos, iYPos);
+		int randomCounter = 0;
+		int i = 0;
+
+		setAllBattleShipsVisible(false);
+		do {
+			list = m_alBattleShips.listIterator();
+			while (list.hasNext()) {
+				oBattleShip = list.next();
+				oBattleShip.setDirection(1);
+				oBattleShip.setPosition(randomCounter * 3 + 1, 1);
 				randomCounter++;
-				/*try {
-					oThr.sleep(1000);
-				} catch (InterruptedException e) {}*/
-				//System.out.println("width: " + width + " iXPos: " + iXPos + " cond: " + (m_iFieldWidth - width - 1));
-			} while (
-				randomCounter < 1000 && (shipsIntersect(noTouching) || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)))
-			);
-		}
+			}
+			list = m_alBattleShips.listIterator();
+			while (list.hasNext()) {
+				randomCounter = 0;
+				oBattleShip = list.next();
+				do {
+					do {
+						iDirection = (int)Math.round(Math.random() * 3) + 1;
+						oBattleShip.setDirection(iDirection);
+						width = oBattleShip.getSize().width / m_iCellWidth;
+						height = oBattleShip.getSize().height / m_iCellWidth;
+						iXPos = (int)Math.round(Math.random() * (m_iFieldWidth - width));
+						iYPos = (int)Math.round(Math.random() * (m_iFieldWidth - height));
+						oBattleShip.setPosition(iXPos, iYPos);
+						randomCounter++;
+						/*try {
+							oThr.sleep(1000);
+						} catch (InterruptedException e) {}*/
+						//System.out.println("width: " + width + " iXPos: " + iXPos + " cond: " + (m_iFieldWidth - width - 1));
+					} while (
+						randomCounter < 500 && (shipsIntersect(noTouching) || !touchEdge && ((iXPos == 0 || iXPos > m_iFieldWidth - width - 1) || (iYPos == 0 || iYPos > m_iFieldWidth - height - 1)))
+					);
+					if (randomCounter == 501) {
+						touchEdge = true; 
+					}
+				} while (randomCounter == 500);
+			}
+			i++;
+		} while (randomCounter == 501 && i < 10);
+		setAllBattleShipsVisible(true);
 	}
 	
 	public void removeAllShips() {

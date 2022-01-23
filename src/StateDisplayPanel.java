@@ -60,6 +60,7 @@ public class StateDisplayPanel extends Container {
 			g.drawString(m_sText, Math.round(oFntMetrics.getMaxAdvance() / 4), iY);
 			g.drawRect(0, 0, getBounds().width - 1, getBounds().height - 1);
 			g.drawRect(1, 1, getBounds().width - 3, getBounds().height - 3);
+			g.drawRect(2, 2, getBounds().width - 5, getBounds().height - 5);
 		}
 		super.paint(g);
 	}
