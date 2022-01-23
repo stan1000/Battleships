@@ -121,14 +121,16 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_autoBot;
 	private boolean m_debug;
 	private int m_timeOutSeconds;
+	private boolean m_startBot;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
 	
 	public BattleShipsPanel(boolean bClientOnly, boolean debug) {
 		m_bClientOnly = bClientOnly;
-		m_autoBot = false;
 		m_debug = debug;
+		m_autoBot = false;
+		m_startBot = false;
 	}
 	
 	public void init() {
@@ -155,6 +157,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		GfxAnimatedButton btnCancel;
 		int xLoc;
 		int statePanelFontSize;
+		boolean isClient;
+		boolean startServer;
 		
 		setLayout(null);
 		setBackground(Color.white);
@@ -487,7 +491,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_btnDisconnectEnemy.setVisible(false);
 		
 		setPlayerName(getCookie("PlayerName"));
-		setClientServer((getCookie("IsClient").equals("1") ? true : false), false);
+		startServer = (parseIntParm("StartServer", 0) == 1);
+		isClient = getCookie("IsClient").equals("1") && !m_startBot && !startServer;
+		setClientServer(isClient, false);
 		//m_btnDisconnectEnemy.setText(getString("DisconnectEnemy"), TextDisplayPanel.AUTO_RESIZE);
 		
 		if (m_bClientOnly && !bUseLocalConfig) {
@@ -500,7 +506,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		} else {
 			bRetTmp = initConfig();
 			if (bRetTmp) {
-				if (parseIntParm("StartServer", 0) == 1) {
+				if (startServer || m_startBot) {
 					startServer();
 					setStatus(getString("ServerStarted"));
 					if (m_bUseWebServer) {
@@ -682,6 +688,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	public void setTimeOutSeconds(int timeOutSeconds) {
 		m_timeOutSeconds = timeOutSeconds;
+	}
+	
+	public void setStartBot(boolean startBot) {
+		m_startBot = startBot;
 	}
 	
 	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {

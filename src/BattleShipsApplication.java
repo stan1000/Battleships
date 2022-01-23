@@ -44,6 +44,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 	public BattleShipsApplication(String[] args) {
 		CliArgs cliArgs = new CliArgs(args);
 		boolean debug = cliArgs.switchPresent("-debug");
+		boolean startBot = cliArgs.switchPresent("-startbot");
 		m_oUtil = new BattleShipsUtility();
 		m_propCookies = new Properties();
 		m_cl = this.getClass().getClassLoader();
@@ -57,10 +58,18 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(false, debug));
 			setVisible(true);
 			setSize(640, 480);
+			m_oBtlShips.setStartBot(startBot);
 			m_oBtlShips.init();
 		} else {
 			System.err.println(m_oUtil.getErrorMessage());
 			System.exit(1);
+		}
+		if (startBot) {
+			new Thread() {
+				public void run() {
+					BattleShipsBot.main(new String[]{"-invisible"});
+				}
+			}.start();
 		}
 	}
 
