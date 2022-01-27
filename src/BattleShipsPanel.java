@@ -52,11 +52,12 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private GfxAnimatedButton m_oBtnToggleConnect;
 	private TextField m_oTxtServer;
 	private GfxAnimatedButton m_oBtnToggleServer;
-	private boolean m_bIsClient;
+	private int m_mode;
 	private BattleShipsConnection m_oSchSocket;
 	private boolean m_bServerRunning;
 	private Checkbox m_oCbClient;
 	private Checkbox m_oCbServer;
+	private Checkbox m_cbComputer;
 	private boolean m_bConnected;
 	private boolean m_bMeReady;
 	private boolean m_bEnemyReady;
@@ -122,6 +123,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_debug;
 	private int m_timeOutSeconds;
 	private boolean m_startBot;
+	private boolean m_startServer;
+	private BotThread m_botThread;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -131,6 +134,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_debug = debug;
 		m_autoBot = false;
 		m_startBot = false;
+		m_startServer = false;
 	}
 	
 	public void init() {
@@ -157,13 +161,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		GfxAnimatedButton btnCancel;
 		int xLoc;
 		int statePanelFontSize;
-		boolean isClient;
-		boolean startServer;
 		
 		setLayout(null);
 		setBackground(Color.white);
 		m_bPlaying = false;
-		m_bIsClient = false;
+		m_mode = BattleShipsUtility.MODE_CLIENT;
 		m_bServerRunning = false;
 		m_bConnected = false;
 		m_bMeReady = false;
@@ -190,7 +192,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_iServerPort = parseIntParm("ServerPort", 1000);
 		if (m_iServerPort < 1 || m_iServerPort > 65535) m_iServerPort = 1000;
 		m_bPlaySound = (parseIntParm("PlaySound", 0, true) == 1 ? true : false);
-		bRestoreWindow = (parseIntParm("RestoreWindow", 0) == 1 ? true : false);
+		bRestoreWindow = (parseIntParm("RestoreWindow", 0, true) == 1 ? true : false);
 		bUseLocalConfig = (parseIntParm("UseLocalConfig", 0) == 1 ? true : false);
 		oColField = parseColorParm("ColorPlayField", Color.white);
 		oColFieldLines = parseColorParm("ColorPlayFieldLines", Color.black);
@@ -427,9 +429,15 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 
 		m_oCbServer = (Checkbox)m_oPnlConnect.add(new Checkbox(getString("Server"), true, oCbgConnect));
 		m_oCbServer.setFont(oFntMainFont);
-		m_oCbServer.setLocation(0, 20);
+		m_oCbServer.setLocation(0, 18);
 		//**m_oCbServer.addMouseListener(new TheMouseAdapter((Object)this, "CbServer"));
 		m_oCbServer.addMouseListener(new TheMouseAdapter((Object)this, "y"));
+		
+		m_cbComputer = (Checkbox)m_oPnlConnect.add(new Checkbox(getString("Computer"), true, oCbgConnect));
+		m_cbComputer.setFont(oFntMainFont);
+		m_cbComputer.setLocation(0, 36);
+		//**m_oCbServer.addMouseListener(new TheMouseAdapter((Object)this, "CbComputer"));
+		m_cbComputer.addMouseListener(new TheMouseAdapter((Object)this, "com"));
 		
 		m_oPnlClient = (Container)m_oPnlConnect.add(new Container());
 		m_oPnlClient.setVisible(false);
@@ -455,6 +463,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 
 		m_oCbRestoreWindow = (Checkbox)m_oPnlConnect.add(new Checkbox(getString("RestoreWindow"), bRestoreWindow));
 		m_oCbRestoreWindow.setFont(oFntMainFont);
+		//**m_oCbRestoreWindow.addMouseListener(new TheMouseAdapter((Object)this, "CbRestoreWindow"));
+		m_oCbRestoreWindow.addMouseListener(new TheMouseAdapter((Object)this, "rw"));
 		
 		m_oAuGameStart = getAudioClip("res/game_start.au");
 		m_oAuShipHit = getAudioClip("res/ship_hit.au");
@@ -491,13 +501,19 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_btnDisconnectEnemy.setVisible(false);
 		
 		setPlayerName(getCookie("PlayerName"));
-		startServer = (parseIntParm("StartServer", 0) == 1);
-		isClient = getCookie("IsClient").equals("1") && !m_startBot && !startServer;
-		setClientServer(isClient, false);
+		try {
+			m_mode = Integer.parseInt(getCookie("Mode"));
+		} catch (NumberFormatException e) { }
+		if (m_startBot) {
+			m_mode = BattleShipsUtility.MODE_COMPUTER;
+		} else if (m_startServer) {
+			m_mode = BattleShipsUtility.MODE_SERVER;
+		}
+		setMode(m_mode, false);
 		//m_btnDisconnectEnemy.setText(getString("DisconnectEnemy"), TextDisplayPanel.AUTO_RESIZE);
 		
 		if (m_bClientOnly && !bUseLocalConfig) {
-			m_bIsClient = true;
+			m_mode = BattleShipsUtility.MODE_CLIENT;
 			setBounds(0, getParent().getInsets().top, 400, 300);
 			remove(m_oTxtStatus);
 			add(m_oTxtStatus, 0);
@@ -506,16 +522,19 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		} else {
 			bRetTmp = initConfig();
 			if (bRetTmp) {
-				if (startServer || m_startBot) {
+				if (m_startServer || m_startBot) {
 					startServer();
 					setStatus(getString("ServerStarted"));
 					if (m_bUseWebServer) {
 						startWebServer();
 					}
 				}
+				if (m_startBot) {
+					m_botThread = new BotThread();
+					m_botThread.start();
+				}
 			}
 		}
-		
 	}
 	
 	public void stop() {
@@ -608,6 +627,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			m_oPlMyShips.removeAllShips();
 			m_oCbClient.setEnabled(false);
 			m_oCbServer.setEnabled(false);
+			m_cbComputer.setEnabled(false);
 			m_oTxtServer.setEnabled(false);
 			m_oBtnToggleConnect.setEnabled(false);
 			m_oBtnToggleServer.setEnabled(false);
@@ -626,7 +646,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		
 		iFieldDim = m_oPlMyShips.getSize().width;
 		if (iFieldDim < 230) iFieldDim = 230;
-		iHeight = iFieldDim + VERT_BORDER_PADDING + scoreFieldHeight + 205;
+		iHeight = iFieldDim + VERT_BORDER_PADDING + scoreFieldHeight + 221;
 		iWidth = iFieldDim * 2 + HORIZ_BORDER_PADDING * 3;
 		oParent.setSize(iWidth, iHeight + iTop);
 		setBounds(0, iTop, iWidth, iHeight);
@@ -649,17 +669,18 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oLblChat.setLocation(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 20);
 		m_oTxtChatInput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 39, iFieldDim, iFontHeightChat);
 		m_oTxtChatOutput.setBounds(HORIZ_BORDER_PADDING + iFieldDim + 15, VERT_BORDER_PADDING + iFieldDim + iFontHeightChat + scoreFieldHeight + 40, iFieldDim, 112 - iFontHeightChat);
-		m_oPnlConnect.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 156, iFieldDim * 2 + 15, iFontHeight * 2);
+		m_oPnlConnect.setBounds(HORIZ_BORDER_PADDING, VERT_BORDER_PADDING + iFieldDim + scoreFieldHeight + 156, iFieldDim * 2 + 15, iFontHeight * 3);
 		m_oCbClient.setSize(m_oFntMetrMain.stringWidth(m_oCbClient.getLabel()) + 20, iFontHeight);
 		m_oCbServer.setSize(m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 20, iFontHeight);
+		m_cbComputer.setSize(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 20, iFontHeight);
 		m_oTxtServer.setBounds(0, iFontHeight - 2, 170, iFontHeightChat);
 		m_oBtnToggleConnect.setLocation(171, iFontHeight - 2);
 		m_oBtnToggleConnect.setSize(m_oBtnToggleConnect.getSize().width, iFontHeightChat - 1);
-		m_oPnlClient.setBounds(m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30, 0, iFieldDim * 2 + 15 - (m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30), iFontHeightChat * 2);
+		m_oPnlClient.setBounds(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 30, 0, iFieldDim * 2 + 15 - (m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30), iFontHeightChat * 2);
 		//m_oPnlClient.setBackground(Color.green);
-		m_oBtnToggleServer.setLocation(m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30, 7);
+		m_oBtnToggleServer.setLocation(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 30, 5);
 		m_oCbRestoreWindow.setBounds(HORIZ_BORDER_PADDING + iFieldDim + (iFieldDim - (m_oFntMetrMain.stringWidth(m_oCbRestoreWindow.getLabel()) + 20)), 0, m_oFntMetrMain.stringWidth(m_oCbRestoreWindow.getLabel()) + 20, iFontHeight);
-		m_pnlPlayerName.setBounds(iFieldDim - m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) - 15, 0, iFieldDim, iFontHeight * 2);
+		m_pnlPlayerName.setBounds(iFieldDim - m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) - 15, 0, iFieldDim, iFontHeight * 2);
 		//m_pnlPlayerName.setBackground(Color.green);
 		m_txtPlayerName.setBounds(0, iFontHeight - 2, 170, iFontHeightChat);
 		m_btnSetPlayerName.setLocation(171, iFontHeight - 2);
@@ -671,6 +692,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		if (m_bClientOnly) {
 			m_oCbClient.setVisible(false);
 			m_oCbServer.setVisible(false);
+			m_cbComputer.setVisible(false);
 			m_oCbRestoreWindow.setVisible(false);
 			m_oBtnToggleServer.setVisible(false);
 			m_oBtnToggleConnect.setVisible(false);
@@ -692,6 +714,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	public void setStartBot(boolean startBot) {
 		m_startBot = startBot;
+	}
+	
+	public void setStartServer(boolean startServer) {
+		m_startServer = startServer;
 	}
 	
 	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {
@@ -1024,7 +1050,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				appendStatus(getString("RefreshPage"));
 				connect();
 			}
-			if (!m_bIsClient) {
+			if (m_mode != BattleShipsUtility.MODE_CLIENT) {
 				startServer();
 			}
 			if (m_tmrTimeOut != null) m_tmrTimeOut.interrupt();
@@ -1064,7 +1090,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			refreshTimeOut = true;
 		} else if (sMessage.equals("status")) {
 			if (sData.equals("Connected")) {
-				setStatus(getString("Connected"));
+				if (m_mode == BattleShipsUtility.MODE_COMPUTER) {
+					setStatus(getString("BotStarted"));
+				} else {
+					setStatus(getString("Connected"));
+				}
 				m_oBtnReady.setEnabled(true);
 				m_oTxtChatInput.setEnabled(true);
 				m_oPntScore = new Point(0, 0);
@@ -1074,9 +1104,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				setScoreBounds();
 				setServerPlayerName();
 				if (!m_bClientOnly) setCookie("ServerName", m_oTxtServer.getText());
-				if (!m_bIsClient) {
+				if (m_mode != BattleShipsUtility.MODE_CLIENT) {
 					if (!m_bClientOnly && m_oCbRestoreWindow.getState()) setNormalState();
-					if (m_bPlaySound) playAudioClip(m_oAuConnect);
+					if (m_mode != BattleShipsUtility.MODE_COMPUTER && m_bPlaySound) playAudioClip(m_oAuConnect);
 					sendMessage("config", m_sCurrentConfig);
 				}
 			} else if (sData.equals("Waiting")) {
@@ -1293,28 +1323,34 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oLblScore.setVisible(false);
 		m_connWithDedicatedServer = false;
 		m_showSelectEnemy = false;
-		if (m_bIsClient) {
-			if (!m_bClientOnly)
-				setButtonLabelAndSize(m_oBtnToggleConnect, getString("Connect"), false);
-			m_oBtnToggleConnect.repaint();
-			m_bConnected = false;
-			m_oCbClient.setEnabled(true);
-			m_oCbServer.setEnabled(true);
-			m_oTxtServer.setEnabled(true);
-			m_cntSelectEnemy.setVisible(false);
-			m_btnSetPlayerName.setEnabled(false);
-			m_txtPlayerName.setEnabled(true);
-			m_playerName = "";
-			m_enemyPlayerName = "";
-			toggleConfirmation(null);
-			m_btnDisconnectEnemy.setVisible(false);
-			m_oLblEnemyShips.setText(getString("EnemyShips"), TextDisplayPanel.AUTO_RESIZE);
-		} else {
-			setButtonLabelAndSize(m_oBtnToggleServer, getString("ServerStart"), false);
-			m_oBtnToggleServer.repaint();
-			m_bServerRunning = false;
-			m_oCbClient.setEnabled(true);
-			m_oCbServer.setEnabled(true);
+		switch (m_mode) {
+			case BattleShipsUtility.MODE_CLIENT:
+				if (!m_bClientOnly)
+					setButtonLabelAndSize(m_oBtnToggleConnect, getString("Connect"), false);
+				m_oBtnToggleConnect.repaint();
+				m_bConnected = false;
+				m_oCbClient.setEnabled(true);
+				m_oCbServer.setEnabled(true);
+				m_cbComputer.setEnabled(true);
+				m_oTxtServer.setEnabled(true);
+				m_cntSelectEnemy.setVisible(false);
+				m_btnSetPlayerName.setEnabled(false);
+				m_txtPlayerName.setEnabled(true);
+				m_playerName = "";
+				m_enemyPlayerName = "";
+				toggleConfirmation(null);
+				m_btnDisconnectEnemy.setVisible(false);
+				m_oLblEnemyShips.setText(getString("EnemyShips"), TextDisplayPanel.AUTO_RESIZE);
+				break;
+			case BattleShipsUtility.MODE_SERVER:
+			case BattleShipsUtility.MODE_COMPUTER:
+				setButtonLabelAndSize(m_oBtnToggleServer, getString("ServerStart"), false);
+				m_oBtnToggleServer.repaint();
+				m_bServerRunning = false;
+				m_oCbClient.setEnabled(true);
+				m_oCbServer.setEnabled(true);
+				m_cbComputer.setEnabled(true);
+				break;
 		}
 	}
 	
@@ -1429,46 +1465,66 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			setServerPlayerName();
 		}
 	}
-
 	
 	//**public void CbClient_MouseClicked(MouseEvent event) {
 	public void x_ou(MouseEvent event) {
 		if (event.getModifiers() != 16) return;
-		setClientServer(true, true);
+		setMode(BattleShipsUtility.MODE_CLIENT, true);
 	}
 	
 	//**public void CbServer_MouseClicked(MouseEvent event) {
 	public void y_ou(MouseEvent event) {
 		if (event.getModifiers() != 16) return;
-		setClientServer(false, true);
+		setMode(BattleShipsUtility.MODE_SERVER, true);
 	}
 	
-	private void setClientServer(boolean isClient, boolean setCookie) {
-		if (isClient) {
-			if (!m_bIsClient) {
+	//**public void CbComputer_MouseClicked(MouseEvent event) {
+	public void com_ou(MouseEvent event) {
+		if (event.getModifiers() != 16) return;
+		setMode(BattleShipsUtility.MODE_COMPUTER, true);
+	}
+	
+	private void setMode(int mode, boolean setCookie) {
+		/*TODO:
+		- don't start server + bot when selecting "Computer"
+		- leave Start button for mode = computer, let it act similar like for starting server
+		- on stop, interrupt bot + server
+		*/
+		m_mode = mode;
+		switch (mode) {
+			case BattleShipsUtility.MODE_CLIENT:
 				m_oPnlClient.setVisible(true);
 				m_oBtnToggleServer.setVisible(false);
 				m_oCbRestoreWindow.setVisible(false);
-				m_bIsClient = true;
-				if (setCookie) {
-					setCookie("IsClient", "1");
-				} else {
+				if (!setCookie) {
 					m_oCbClient.setState(true);
 				}
-			}
-		} else {
-			if (m_bIsClient) {
+				break;
+			case BattleShipsUtility.MODE_SERVER:
 				m_oPnlClient.setVisible(false);
 				m_oBtnToggleServer.setVisible(true);
 				m_oCbRestoreWindow.setVisible(true);
-				m_bIsClient = false;
-				if (setCookie) {
-					setCookie("IsClient", "0");
-				} else {
+				if (!setCookie) {
 					m_oCbServer.setState(true);
 				}
-			}
+				break;
+			case BattleShipsUtility.MODE_COMPUTER:
+				m_oPnlClient.setVisible(false);
+				m_oBtnToggleServer.setVisible(true);
+				m_oCbRestoreWindow.setVisible(false);
+				if (!setCookie) {
+					m_cbComputer.setState(true);
+				}
+				break;
 		}
+		if (setCookie)
+			setCookie("Mode", Integer.toString(mode));
+	}
+
+	//**public void CbRestoreWindow_MouseClicked(MouseEvent event) {
+	public void rw_omc(MouseEvent event) {
+		if (event.getModifiers() != 16) return;
+		setCookie("RestoreWindow", (m_oCbRestoreWindow.getState() ? "1" : "0"));
 	}
 
 	//**public void GameOver_TimerEvent() {
@@ -1511,7 +1567,14 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		}*/
 		if (event.getModifiers() != 16) return;
 		if (m_bServerRunning) {
-			setStatus(getString("ServerStopped"));
+			if (m_mode == BattleShipsUtility.MODE_COMPUTER) {
+				setStatus(getString("BotStopped"));
+				if (m_botThread != null) {
+					m_botThread.interrupt();
+				}
+			} else {
+				setStatus(getString("ServerStopped"));
+			}
 			stopConnect();
 			if (m_oWebServer != null) {
 				m_oWebServer.interrupt();
@@ -1523,6 +1586,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				startWebServer();
 			}
 			if (!m_bClientOnly) changeConfig(m_sOriginalConfig);
+			if (m_mode == BattleShipsUtility.MODE_COMPUTER) {
+				m_botThread = new BotThread();
+				m_botThread.start();
+			}
 		}
 	}
 	//** public void BtnSetPlayerName_MouseClicked(MouseEvent event) {
@@ -1567,6 +1634,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_bServerRunning = true;
 		m_oCbClient.setEnabled(false);
 		m_oCbServer.setEnabled(false);
+		m_cbComputer.setEnabled(false);
 	}
 	
 	private void startWebServer() {
@@ -1651,6 +1719,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_bConnected = true;
 		m_oCbClient.setEnabled(false);
 		m_oCbServer.setEnabled(false);
+		m_cbComputer.setEnabled(false);
 		m_oTxtServer.setEnabled(false);
 	}
 	
@@ -1684,6 +1753,14 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 
 	private void print(String sString) {
 		System.out.println(sString);
+	}
+	
+	private class BotThread extends Thread {
+		
+		public void run() {
+			BattleShipsBot.main(new String[]{"-invisible"});
+		}
+		
 	}
 	
 }

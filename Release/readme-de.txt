@@ -30,15 +30,23 @@ Einstellungsdateien
 ====================
 config.htm		Texte für alle Ausgaben im Hauptprogramm, dediziertem Server und Bot, sowie einige weitere Einstellungen für das Hauptprogramm
 server.cfg		- Generelle Spielkonfiguration für Hauptprogramm und Dedizierten Server
-		- weitere Server-spezifische Einstellungen, wie z.B. Webserver Benutzung und Remote-Befehle
+				- weitere Server-spezifische Einstellungen, wie z.B. Webserver Benutzung und Remote-Befehle
 
 Hauptprogramm: BattleShipsApplication
-====================================
+=====================================
 Nach dem Starten hat man die Wahl ob der eigene PC als Client oder als Server fungieren soll. Die zwei Radio-Buttons am unteren linken Rand des Fensters ändern den Modus entsprechend. Die Schiffe verden positioniert indem man sie mit der Maus an die gewünschte Stelle zieht. Die Richtung ändert man per Rechtsklick. Nach dem Verbindungsaufbau wird der "Bereit"-Knopf aktiv. Wird dieser gedrückt, kann man seine Schiffe nicht mehr bewegen, hat der Gegner dies auch getan beginnt das Spiel. Es beginnt derjenige, der zuerst den "Bereit"-Knopf angeklickt hat. Jeder ist abwechselnd dran, es sei denn der letzte Schuss war ein Treffer. In diesem Fall hat man noch einen Schuss, d.h. man darf solange schießen wie man trifft. Sowohl die eigenen als auch die gegnerischen Schüsse werden markiert, der letzte Schuss ist farblich hervorgehoben. Treffer werden entsprechend angezeigt, auf dem gegnerischen Feld erscheint das entsprechende Segment des getroffenen Schiffes. Rest, siehe Benutzeroberfläche (Status, Schiffe Verstecken, Punktestand, etc.).
+
+Kommandozeilen-Parameter:
+-action <Name>
+	mögliche Aktionen:
+	startserver
+		Startet die Anwendung im "Server Modus" und gleichzeitig den Server, sprich wartet auf eine Client-Verbindung
+	startbot
+		Startet die Anwendung im "Computer Modus", den Server sowie eine unsichtbare Instanz des BattleShipsBot, welche sich mit der Anwendung verbindet. Dadurch ist es möglich lokal gegen den Computer zu spielen ohne die BattleShipsBot-Anwendung separat starten zu müssen
 
 Dedizierter Server: BattleShipsServerApplication
 ================================================
-Als Alternative zur Peer-to-Peer Verbindung - bei der einer der Mitspieler das Hauptprogramm im Server-Modus laufen lässt - gibt es den dedizierten Server als Konsolen-Anwendung. Die Anzahl der möglichen Verbindungen ist hierbei nur durch die Hardware-Resourcen und Netzwerkanbindung des Server-Rechners limitiert.
+Als Alternative zur Peer-to-Peer Verbindung - bei der einer der Mitspieler das Hauptprogramm im Server-Modus laufen lässt - gibt es den dedizierten Server als Konsolen-Anwendung. Die Anzahl der möglichen Verbindungen ist hierbei nur durch die Hardware-Resourcen und Netzwerkanbindung des Servers limitiert.
 Wenn sich ein Client mit dem Server verbindet wird ihm ein zufallsgenerierter Spielername zugewiesen und befindet sich zunächst in einem virtuellen Wartezimmer. Der Spielername kann mithilfe des entsprechenden Eingabefeldes und "Einstellen" Knopfes auf der Benutzeroberfläches der Spiels geändert werden. Wenn ein Client gerade nicht mit einem anderen verbunden ist erscheint ein Popup in dem der Benutzer einen Gegner auswählen kann. 
 Eine bestehende Verbindung mit einem anderen Client kann jederzeit getrennt werden indem man das rote Symbol in der rechten unteren Ecke der Spiel-UI anklickt.
 Der Server startet ebenfalls den mitgelieferten Webserver sofern dies eingestellt wurde. Es ist möglich Befehle in der lokalen Server-Konsole abzusetzen.
@@ -61,15 +69,17 @@ Beispiel: /l Passwort
 
 Bot: BattleShipsBot
 ====================
-Die BattleShipsBot-Anwendung basiert grafisch auf dem Hauptprogramm BattleShipsApplication und ermöglicht es gegen den Computer zu spielen. Sie can sich mit dem Hauptprogramm im Server-Modus verbinden oder mit dem dedizierten Server, wo der Bot genauso wie ein menschlicher Spieler unter dem per Commandozeile (komplette Liste s. unten) angegebenen Namen im virtuellen Wartezimmer angezeigt wird. Nachdem man den Bot als seinen Gegner im Popup des Hauptprogramms ausgewählt hat, positioniert man wiederum seine Schiffe und klickt den "Bereit"-Knopf. Daraufhin sendet the Bot ebenfalls ein Bereit-Signal und das Spiel beginnt!
+Die BattleShipsBot-Anwendung basiert grafisch auf dem Hauptprogramm BattleShipsApplication und ermöglicht es gegen den Computer zu spielen. Sie can sich mit dem Hauptprogramm im Server-Modus verbinden oder mit dem dedizierten Server, wo der Bot genauso wie ein menschlicher Spieler unter dem per Commandozeile (komplette Liste s. unten) angegebenen Namen im virtuellen Wartezimmer angezeigt wird. Nachdem man den Bot als seinen Gegner im Popup des Hauptprogramms ausgewählt hat, positioniert man wiederum seine Schiffe und klickt den "Bereit"-Knopf. Daraufhin sendet der Bot ebenfalls ein Bereit-Signal und das Spiel beginnt!
 
 Kommandozeilen-Parameter:
--name
+-name <Botname>
 	Name des Bots wenn man sich mit dem dedizierten Server verbindet; kann auch im Spielername-Feld gesetzt werden, falls der Bot im sichtbaren Modus läuft
--server
-	Server mit dem sich der Bot verbinden soll, wie stan1000.dynv6.net; Voreinstellung: localhost
+-server <Hostname>
+	Server mit dem sich der Bot verbinden soll, wie stan1000.dynv6.net; Voreinstellung: localhost (siehe config.htm für Einstellung des Ports)
 -invisible
 	Den Bot unsichtbar laufen lassen; Hinweis: im Gegensatz zum dedizierten Server ist der Bot nach wie vor eine UI-Anwendung und funktioniert deshalb nur wenn eine GUI vorhanden ist - das sollte man erwägen, z.B. beim Einsatz auf schlanken, Linux-basierten Servern wie dem Raspberry Pi
+-timeout <Sekunden>
+	Zeit ohne Aktivität nach der sich der Bot trennt wenn er mit einem Spieler auf einem dedizierten Server verbunden ist
 
 Lokalisierung
 ====================

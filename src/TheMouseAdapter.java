@@ -70,7 +70,9 @@ public class TheMouseAdapter extends MouseAdapter {
 	}
 	
 	public void mouseClicked(MouseEvent event) {
-		if (event.getClickCount() == 2){
+		if (event.getClickCount() == 1){
+			handleMouseEvent("mc", event);
+		} else if (event.getClickCount() == 2){
 			handleMouseEvent("db", event);
 		}
 	}
