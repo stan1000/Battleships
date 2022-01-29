@@ -1,7 +1,7 @@
 Schiffe Versenken (Battleships) V2.0
 © 2005-2022 Stan Holoubek
 http://www.stans-world.de/battleships.html
-Please send comments to stan07@online.de
+Please send comments to battleships@stans-world.de
 
 Short description:
 The popular game as client/server edition for playing over the Internet or on the LAN.
