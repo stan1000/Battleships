@@ -3,18 +3,20 @@ Battleships
 
 Goal: to find developers who would like to bring it to the next level. I can't continue investing any time since my focus in life has changed.
 
-1. I've started developing a bot for being able to play even when no other human players are connected to the server, but didn't get too far. Would love to see it become really sophisticated. UPDATE: taken up developing this as a hobby, bot is coming along nicely >:->
-2. A port to Android would be brilliant; I've started to investigate but had to find how incompatible the Android UI classes are with AWT. Certainly an ambitious project!
+1. I've started developing a bot for being able to play even when no other human players are connected to the server, but didn't get too far. Would love to see it become really sophisticated.
+UPDATE: taken up developing this as a hobby, bot is coming along nicely >:->
+3. A port to Android would be brilliant; I've started to investigate but had to find how incompatible the Android UI classes are with AWT. Certainly an ambitious project!
 
 Note: this is the content of the readme file that comes with the normal deployment ZIP; should give some ideas about all the features, etc.
 
 README:
 ===========
 
-Schiffe Versenken (Battleships) V2.0
-© 2005-2022 Stan Holoubek
-http://www.stans-world.de/battleships.html
-Please send comments to battleships@stans-world.de
+Schiffe Versenken (Battleships) V2.0  
+© 2005-2022 Stan Holoubek  
+http://www.stans-world.de/battleships.html  
+http://www.stans-world.de/schiffe_versenken.html  
+Please send comments to battleships@stans-world.de  
 
 Short description:
 The popular game as client/server edition for playing over the Internet or on the LAN.
@@ -36,14 +38,14 @@ Features
 
 Installation
 ====================
-Unzip BattleShips.zip to the folder BattleShips, rename config-xx.htm of the preferred language to config.htm (default is en) and double-click BattleShipsApplication.bat to start.
+Unzip BattleShips.zip to the folder BattleShips, rename config-xx.htm of the preferred language to config.htm (default is en) and double-click BattleShipsApplication.bat to start.  
 Linux: *.sh; see comments for settings and usage
 
 Configuration files
 ====================
-config.htm		Text strings for all output in the application and dedicated server, and further settings for the application
-server.cfg		- general game configuration for the application and the dedicated server
-				- further server specific setting, like e.g. use of webserver and remote commands
+config.htm		Text strings for all output in the application and dedicated server, and further settings for the application  
+server.cfg		- general game configuration for the application and the dedicated server  
+				- further server specific setting, like e.g. use of webserver and remote commands  
 
 Main Application: BattleShipsApplication
 ========================================
@@ -59,39 +61,39 @@ Command-line parameters:
 
 Dedicated Server: BattleShipsServerApplication
 ===============================================
-As an alternative to the peer-to-peer connection with one client running the main application in server mode, there is the dedicated server console application. The amount of possible connections is only limited by the hardware resources and network connection of the server machine.
+As an alternative to the peer-to-peer connection with one client running the main application in server mode, there is the dedicated server console application. The amount of possible connections is only limited by the hardware resources and network connection of the server machine.  
 When a client connects to the server it is assigned a random player name and placed in a virtual waiting room. The player name can then be changed using the according text box and "Set" button on the game UI. If a client is currently not connected to another one, a popup is displayed in the application where the user can select who to play with. An existing connection with another user can be disconnected anytime by clicking the red icon in the right bottom border of the game UI.
 The server also runs the web server if configured to. It's possible to issue commands in the local server console.
 
-Supported commands:
-c - Print client list
-k - Kick player; usage: k <player name>
-h - Help
-x - Exit
+Supported commands:  
+c - Print client list  
+k - Kick player; usage: k <player name>  
+h - Help  
+x - Exit  
 
 It's also possible to issue commands remotely from the chat input box of each client, provided this feature has been enabled in server.cfg and the user has logged in with the correct remote console password. Each command has to be prefixed with a /.
  
-Supported commands:
-c - Print client list
-k - Kick player; usage: k <player name>
-l - Login; usage: l <Rcon Password>
-h - Help
-x - Exit/Logout
+Supported commands:  
+c - Print client list  
+k - Kick player; usage: k <player name>  
+l - Login; usage: l <Rcon Password>  
+h - Help  
+x - Exit/Logout  
 Example: /l password
 
 Bot: BattleShipsBot
 ====================
 The BattleShipsBot application enables you to play against the computer. It can connect to the main application running in server mode or to the dedicated server, showing up in the virtual waiting room just like a human player, by the name assigned on startup via a command line parameter (complete list below). After selecting the bot as your adversary in the application popup, you position your ships as ever and click the "Ready" button. This will prompt the bot to also send a ready-signal and the game is on!
 
-Command-line parameters:
--name <botname>
-	The name of the bot when connecting to the dedicated server; it can also be set in the player name field if the bot is running in visible mode
--server <hostname>
-	The server to connect to, like stan1000.dynv6.net; default: localhost (see config.htm for port setting)
--invisible
-	hide the bot UI; Note: in difference to the dedicated server, the bot is still a UI application and only works when a GUI is present - something to consider on small footprint Linux-based servers, like e.g. the Raspberry Pi
--timeout <seconds>
-	Time of inactivity after which the bot will disconnect when connected to a player on a dedicated server; default: 600
+Command-line parameters:  
+-name <botname>  
+	The name of the bot when connecting to the dedicated server; it can also be set in the player name field if the bot is running in visible mode  
+-server <hostname>  
+	The server to connect to, like stan1000.dynv6.net; default: localhost (see config.htm for port setting)  
+-invisible  
+	hide the bot UI; Note: in difference to the dedicated server, the bot is still a UI application and only works when a GUI is present - something to consider on small footprint Linux-based servers, like e.g. the Raspberry Pi  
+-timeout <seconds>  
+	Time of inactivity after which the bot will disconnect when connected to a player on a dedicated server; default: 600  
 
 Localization
 ====================
