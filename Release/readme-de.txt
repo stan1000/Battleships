@@ -79,7 +79,7 @@ Kommandozeilen-Parameter:
 -invisible
 	Den Bot unsichtbar laufen lassen; Hinweis: im Gegensatz zum dedizierten Server ist der Bot nach wie vor eine UI-Anwendung und funktioniert deshalb nur wenn eine GUI vorhanden ist - das sollte man erwägen, z.B. beim Einsatz auf schlanken, Linux-basierten Servern wie dem Raspberry Pi
 -timeout <Sekunden>
-	Zeit ohne Aktivität nach der sich der Bot trennt wenn er mit einem Spieler auf einem dedizierten Server verbunden ist
+	Zeit ohne Aktivität nach der sich der Bot trennt wenn er mit einem Spieler auf einem dedizierten Server verbunden ist; Voreinstellung: 600
 
 Lokalisierung
 ====================
