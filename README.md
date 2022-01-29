@@ -1,17 +1,6 @@
 Battleships
 ===========
 
-Goal: to find developers who would like to bring it to the next level. I can't continue investing any time since my focus in life has changed.
-
-1. I've started developing a bot for being able to play even when no other human players are connected to the server, but didn't get too far. Would love to see it become really sophisticated.
-UPDATE: taken up developing this as a hobby, bot is coming along nicely >:->
-3. A port to Android would be brilliant; I've started to investigate but had to find how incompatible the Android UI classes are with AWT. Certainly an ambitious project!
-
-Note: this is the content of the readme file that comes with the normal deployment ZIP; should give some ideas about all the features, etc.
-
-README:
-===========
-
 Schiffe Versenken (Battleships) V2.0  
 © 2005-2022 Stan Holoubek  
 http://www.stans-world.de/battleships.html  
@@ -51,13 +40,11 @@ Main Application: BattleShipsApplication
 ========================================
 After starting the application you can choose between running your PC as client or as server. The two radio buttons at the bottom left corner of the window change the mode accordingly. To position the ships, drag them with the mouse to the desired place. Change the ship orientation by right-clicking. On establishing the connection the "Ready" button is activated. When it's pressed the ships are locked, when the opponent has done the same the game starts. The one who has clicked first begins. The players are taking turns except if the last shot was a hit, in which case the active player has another shot, i.e. you can shoot as often as you hit. Both the own and the opponent's shots are marked, the last shot is highlighted. Hits are shown in a similar way: on the opponent's field the according segment of the hit ship is made visible. For the rest, see UI (Status, hide ships, score, etc.).
 
-Command-line parameters:
--action <name>
-	possible actions:
-	startserver
-		Runs the application in "Server mode" and starts the server, i.e. starts listening for a client connection
-	startbot
-		Runs the application in "Computer mode", starts the server and launches an instance of BattleShipsBot in invisible mode that'll connect to the application. By this it's possible to play locally against the computer without having to launch the BattleShipsBot application separately
+Command-line parameters:  
+-action <name>  
+possible actions
+- startserver: Runs the application in "Server mode" and starts the server, i.e. starts listening for a client connection  
+- startbot: Runs the application in "Computer mode", starts the server and launches an instance of BattleShipsBot in invisible mode that'll connect to the application. By this it's possible to play locally against the computer without having to launch the BattleShipsBot application separately
 
 Dedicated Server: BattleShipsServerApplication
 ===============================================
