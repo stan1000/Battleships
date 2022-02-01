@@ -1,6 +1,8 @@
 Battleships
 ===========
 
+![Battleships Screenshot](http://www.stans-world.de/images/battleships_screenshot.png)
+
 Schiffe Versenken (Battleships) V2.0  
 © 2005-2022 Stan Holoubek  
 http://www.stans-world.de/battleships.html  
