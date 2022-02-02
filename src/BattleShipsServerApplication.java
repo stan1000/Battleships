@@ -28,19 +28,20 @@ public class BattleShipsServerApplication extends Thread {
 	private PrintWriter m_bwLog;
 	
 	public static void main(String[] args) throws IOException {
+		BattleShipsServerApplication oServerCon = new BattleShipsServerApplication(args);
+	}
+	
+	public BattleShipsServerApplication(String[] args) {
 		CliArgs cliArgs = new CliArgs(args);
 		boolean runAsDaemon = cliArgs.switchPresent("-daemon");
-		BattleShipsServerApplication oServerCon = new BattleShipsServerApplication(runAsDaemon);
-	}
-
-	public BattleShipsServerApplication(boolean runAsDaemon) {
+		String serverConfigFile = cliArgs.switchValue("-configfile", "");
 		m_bContinue = true;
 		String sMessage = "";
 		char[] chMessage;
 		BufferedReader oConRead = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			openLogWriter();
-			m_oServer = new BattleShipsServer(m_bwLog);
+			m_oServer = new BattleShipsServer(m_bwLog, serverConfigFile);
 			printHelpMsg();
 			m_oServer.start();
 			while (m_bContinue) {

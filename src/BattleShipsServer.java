@@ -44,12 +44,15 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 
 	private final boolean DEBUG = false;
 
-	public BattleShipsServer(PrintWriter bwLog) {
+	public BattleShipsServer(PrintWriter bwLog, String serverConfigFile) {
 		int iShipType;
 		int iShipTypeCount;
 
 		m_bwLog = bwLog;
 		m_oUtil = new BattleShipsUtility();
+		if (!serverConfigFile.equals("")) {
+			m_oUtil.setServerConfigFile(serverConfigFile);
+		}
 		if (m_oUtil.readParameters()) {
 			m_bAllowRemoteAdmin = (m_oUtil.parseIntParm("AllowRemoteAdmin", 0) == 1 ? true : false);
 			m_sRconPassword = m_oUtil.getParameter("RconPassword", "");

@@ -128,6 +128,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
+	private final int DEFAULT_CELL_WIDTH = 22;
+	private final int DEFAULT_FIELD_WIDTH = 18;
+	private final int MIN_FIELD_SIZE = 340;
 	
 	public BattleShipsPanel(boolean bClientOnly, boolean debug) {
 		m_bClientOnly = bClientOnly;
@@ -185,8 +188,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_timeOutSeconds = 0;
 
 		// get external config parms
-		m_iCellWidth = parseIntParm("CellWidth", 10);
-		m_iFieldWidth = parseIntParm("FieldWidth", 29);
+		m_iCellWidth = parseIntParm("CellWidth", DEFAULT_CELL_WIDTH);
+		m_iFieldWidth = parseIntParm("FieldWidth", DEFAULT_FIELD_WIDTH);
 		m_iPort = parseIntParm("Port", 1000);
 		if (m_iPort < 1 || m_iPort > 65535) m_iPort = 1000;
 		m_iServerPort = parseIntParm("ServerPort", 1000);
@@ -477,7 +480,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_pnlPlayerName = (Container)m_oPnlClient.add(new Container());
 		m_pnlPlayerName.setVisible(true);
 		
-		m_txtPlayerName = (TextField)m_pnlPlayerName.add(new TextFieldWithLimit(15));
+		m_txtPlayerName = (TextField)m_pnlPlayerName.add(new TextFieldWithLimit(20));
 		m_txtPlayerName.setFont(oFntChat);
 		m_txtPlayerName.setLocation(0, 1);
 		m_txtPlayerName.setBackground(Color.white);
@@ -645,7 +648,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		}
 		
 		iFieldDim = m_oPlMyShips.getSize().width;
-		if (iFieldDim < 230) iFieldDim = 230;
+		if (iFieldDim < MIN_FIELD_SIZE) iFieldDim = MIN_FIELD_SIZE;
 		iHeight = iFieldDim + VERT_BORDER_PADDING + scoreFieldHeight + 221;
 		iWidth = iFieldDim * 2 + HORIZ_BORDER_PADDING * 3;
 		oParent.setSize(iWidth, iHeight + iTop);
@@ -676,7 +679,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oTxtServer.setBounds(0, iFontHeight - 2, 170, iFontHeightChat);
 		m_oBtnToggleConnect.setLocation(171, iFontHeight - 2);
 		m_oBtnToggleConnect.setSize(m_oBtnToggleConnect.getSize().width, iFontHeightChat - 1);
-		m_oPnlClient.setBounds(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 30, 0, iFieldDim * 2 + 15 - (m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30), iFontHeightChat * 2);
+		m_oPnlClient.setBounds(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 25, 0, iFieldDim * 2 + 15 - (m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30), iFontHeightChat * 2);
 		//m_oPnlClient.setBackground(Color.green);
 		m_oBtnToggleServer.setLocation(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 30, 5);
 		m_oCbRestoreWindow.setBounds(HORIZ_BORDER_PADDING + iFieldDim + (iFieldDim - (m_oFntMetrMain.stringWidth(m_oCbRestoreWindow.getLabel()) + 20)), 0, m_oFntMetrMain.stringWidth(m_oCbRestoreWindow.getLabel()) + 20, iFontHeight);
@@ -1217,13 +1220,21 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		int i;
 		boolean hasPlayers = false;
 		StringTokenizer stk = new StringTokenizer(playerList, "\n");
-		String playerName = "";
+		String playerName;
+		ArrayList<String> list = new ArrayList<>();
 
 		m_lstPlayerName.removeAll();
 		while (stk.hasMoreTokens()) {
 			playerName = stk.nextToken();
-			m_lstPlayerName.add(playerName);
+			list.add(playerName);
 			hasPlayers = true;
+		}
+		if (hasPlayers) {
+			Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
+			ListIterator<String> listIterator = list.listIterator();
+			while (listIterator.hasNext()) {
+				m_lstPlayerName.add(listIterator.next());
+			}
 		}
 		toggleSelectEnemy(hasPlayers);
 	}

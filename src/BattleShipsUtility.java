@@ -33,8 +33,10 @@ public class BattleShipsUtility {
 	private final static String SERVER_CONFIG_FILE = "server.cfg";
 	private String m_sErrorMessage;
 	private Hashtable<String, String> m_oHtParameters;
+	private String m_serverConfigFile;
 
 	public BattleShipsUtility() {
+		m_serverConfigFile = SERVER_CONFIG_FILE;
 		m_oHtParameters = new Hashtable<String, String>();
 	}
 		
@@ -42,9 +44,13 @@ public class BattleShipsUtility {
 		boolean bRet;
 		bRet = readParameters(CONFIG_FILE);
 		if (bRet) {
-			bRet = readParameters(SERVER_CONFIG_FILE);
+			bRet = readParameters(m_serverConfigFile);
 		}
 		return bRet;
+	}
+	
+	public void setServerConfigFile(String serverConfigFile) {
+		m_serverConfigFile = serverConfigFile;
 	}
 		
 	private boolean readParameters(String sConfigFile) {
