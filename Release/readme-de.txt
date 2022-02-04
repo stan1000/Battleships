@@ -43,6 +43,8 @@ Kommandozeilen-Parameter:
 		Startet die Anwendung im "Server Modus" und gleichzeitig den Server, sprich wartet auf eine Client-Verbindung
 	startbot
 		Startet die Anwendung im "Computer Modus", den Server sowie eine unsichtbare Instanz des BattleShipsBot, welche sich mit der Anwendung verbindet. Dadurch ist es möglich lokal gegen den Computer zu spielen ohne die BattleShipsBot-Anwendung separat starten zu müssen
+-configfile <Name>
+	Eine andere Konfigurationsdatei verwenden als die voreingestellte server.cfg
 
 Dedizierter Server: BattleShipsServerApplication
 ================================================
@@ -79,7 +81,9 @@ Kommandozeilen-Parameter:
 -name <Botname>
 	Name des Bots wenn man sich mit dem dedizierten Server verbindet; kann auch im Spielername-Feld gesetzt werden, falls der Bot im sichtbaren Modus läuft
 -server <Hostname>
-	Server mit dem sich der Bot verbinden soll, wie stan1000.dynv6.net; Voreinstellung: localhost (siehe config.htm für Einstellung des Ports)
+	Server mit dem sich der Bot verbinden soll; Voreinstellung: battleships.dynv6.net
+-port <Port #>
+	Port mit dem sich der Bot verbingen soll
 -invisible
 	Den Bot unsichtbar laufen lassen; Hinweis: im Gegensatz zum dedizierten Server ist der Bot nach wie vor eine UI-Anwendung und funktioniert deshalb nur wenn eine GUI vorhanden ist - das sollte man erwägen, z.B. beim Einsatz auf schlanken, Linux-basierten Servern wie dem Raspberry Pi
 -timeout <Sekunden>
