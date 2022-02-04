@@ -45,9 +45,13 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 		CliArgs cliArgs = new CliArgs(args);
 		boolean debug = cliArgs.switchPresent("-debug");
 		String action = cliArgs.switchValue("-action", "");
+		String serverConfigFile = cliArgs.switchValue("-configfile", "");
 		boolean startBot = action.equals("startbot");
 		boolean startServer = action.equals("startserver");
 		m_oUtil = new BattleShipsUtility();
+		if (!serverConfigFile.equals("")) {
+			m_oUtil.setServerConfigFile(serverConfigFile);
+		}
 		m_propCookies = new Properties();
 		m_cl = this.getClass().getClassLoader();
 		readCookieFile();

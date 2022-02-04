@@ -48,10 +48,12 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		CliArgs cliArgs = new CliArgs(args);
 		boolean debug;
 		int timeOutSeconds;
+		int port;
 		
 		isVisible = !cliArgs.switchPresent("-invisible");
 		playerName = cliArgs.switchValue("-name", DEFAULT_PLAYER_NAME);
 		m_serverName =  cliArgs.switchValue("-server", DEFAULT_SERVER);
+		port = cliArgs.switchIntValue("-port", BattleShipsUtility.DEFAULT_PORT);
 		autoBot = cliArgs.switchPresent("-autobot");
 		debug = cliArgs.switchPresent("-debug");
 		try {
@@ -71,7 +73,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 				setVisible(true);
 				setSize(640, 480);
 			}
-			m_oBtlShips.setIsBot(true, autoBot);
+			m_oBtlShips.setIsBot(true, autoBot, port);
 			m_oBtlShips.init();
 			m_oBtlShips.setPlayerName(playerName);
 			m_oBtlShips.setTimeOutSeconds(timeOutSeconds);

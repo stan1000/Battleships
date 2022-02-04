@@ -28,6 +28,7 @@ public class BattleShipsUtility {
 	public final static int MODE_CLIENT = 1;
 	public final static int MODE_SERVER = 2;
 	public final static int MODE_COMPUTER = 3;
+	public final static int DEFAULT_PORT = 666;
 	
 	private final static String CONFIG_FILE = "config.htm";
 	private final static String SERVER_CONFIG_FILE = "server.cfg";

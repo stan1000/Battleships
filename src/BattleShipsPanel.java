@@ -126,6 +126,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_startBot;
 	private boolean m_startServer;
 	private BotThread m_botThread;
+	private int m_botPort;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -139,6 +140,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_autoBot = false;
 		m_startBot = false;
 		m_startServer = false;
+		m_botPort = 0;
 	}
 	
 	public void init() {
@@ -191,10 +193,15 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		// get external config parms
 		m_iCellWidth = parseIntParm("CellWidth", DEFAULT_CELL_WIDTH);
 		m_iFieldWidth = parseIntParm("FieldWidth", DEFAULT_FIELD_WIDTH);
-		port = parseIntParm("Port", 666, true);
-		if (port < 1 || port > 65535) port = 666;
-		m_iServerPort = parseIntParm("ServerPort", 666);
-		if (m_iServerPort < 1 || m_iServerPort > 65535) m_iServerPort = 666;
+		if (m_botPort > 0) {
+			port = m_botPort;
+		} else {
+			port = parseIntParm("Port", BattleShipsUtility.DEFAULT_PORT, true);
+			if (port < 1 || port > 65535) port = BattleShipsUtility.DEFAULT_PORT;
+		}
+		m_iServerPort = parseIntParm("ServerPort", BattleShipsUtility.DEFAULT_PORT);
+		if (m_iServerPort < 1 || m_iServerPort > 65535) m_iServerPort = BattleShipsUtility.DEFAULT_PORT;
+		m_botPort = m_iServerPort;
 		m_bPlaySound = (parseIntParm("PlaySound", 0, true) == 1 ? true : false);
 		bRestoreWindow = (parseIntParm("RestoreWindow", 0, true) == 1 ? true : false);
 		bUseLocalConfig = (parseIntParm("UseLocalConfig", 0) == 1 ? true : false);
@@ -718,9 +725,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		return bRet;
 	}
 	
-	public void setIsBot(boolean value, boolean autoBot) {
+	public void setIsBot(boolean value, boolean autoBot, int port) {
 		m_isBot	= value;
 		m_autoBot = autoBot;
+		m_botPort = port;
 	}
 	
 	public void setTimeOutSeconds(int timeOutSeconds) {
@@ -1809,7 +1817,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private class BotThread extends Thread {
 		
 		public void run() {
-			BattleShipsBot.main(new String[]{"-invisible"});
+			BattleShipsBot.main(new String[]{"-invisible", "-port", Integer.toString(m_botPort)});
 		}
 		
 	}
