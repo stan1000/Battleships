@@ -50,6 +50,10 @@ As an alternative to the peer-to-peer connection with one client running the mai
 When a client connects to the server it is assigned a random player name and placed in a virtual waiting room. The player name can then be changed using the according text box and "Set" button on the game UI. If a client is currently not connected to another one, a popup is displayed in the application where the user can select who to play with. An existing connection with another user can be disconnected anytime by clicking the red icon in the right bottom border of the game UI.
 The server also runs the web server if configured to. It's possible to issue commands in the local server console.
 
+Command-line parameters:
+-configfile <name>
+	To use a different config file other than the default server.cfg
+
 Supported commands:
 c - Print client list
 k - Kick player; usage: k <player name>

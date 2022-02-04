@@ -51,6 +51,10 @@ Wenn sich ein Client mit dem Server verbindet wird ihm ein zufallsgenerierter Sp
 Eine bestehende Verbindung mit einem anderen Client kann jederzeit getrennt werden indem man das rote Symbol in der rechten unteren Ecke der Spiel-UI anklickt.
 Der Server startet ebenfalls den mitgelieferten Webserver sofern dies eingestellt wurde. Es ist möglich Befehle in der lokalen Server-Konsole abzusetzen.
 
+Kommandozeilen-Parameter:
+-configfile <Name>
+	Eine andere Konfigurationsdatei verwenden als die voreingestellte server.cfg
+
 Unterstützte Befehle:
 c - Client-Liste ausgeben
 k - Spieler entfernen; Benutzung: k <Spielername>

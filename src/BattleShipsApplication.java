@@ -34,7 +34,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 	private ClassLoader m_cl;
 	
 	// Gotta declare "static" due to bug in obfuscator. Ah, well ...
-	private final static String DEFAULT_SERVER = "localhost";
+	private final static String DEFAULT_SERVER = "battleships.dynv6.net";
 	private final static String COOKIE_FILE = "cookies.txt";
 
 	public static void main(String[] args) {

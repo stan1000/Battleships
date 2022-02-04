@@ -1,22 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-<title>Schiffe Versenken</title>
-<script type="text/javascript" src="webres/helpers.js"></script>
-<link rel="stylesheet" type="text/css" href="webres/style.css" />
-</head>
-<body onload="startChange()">
-<applet
-	archive="BattleShips.jar"
-	code="BattleShipsApplet.java"
-	width="1600"
-	height="1200"
-	name="BattleShipsApplet">
-	
-	<param name="Port" value="443" />			<!-- Client TCP Port; für den Server wird nun server.cfg benutzt - 
-												beide Einstellungen müssen übereinstimmen, damit sich verbindende
-												Applets funktionieren -->
-
+<config>
 	<!-- Einstellungen für die Applikation -->
 	<param name="PlaySound" value="1" />		<!-- Sound an/aus -->
 	<param name="RestoreWindow" value="1" />	<!-- Minimiertes Fenster bei Verbindungsaufbau wiederherstellen -->
@@ -90,6 +72,7 @@
 	<param name="String_EnemyLeft" value="Der Gegner hat das Spiel verlassen." />
 	<param name="String_NewEnemy" value="Mit neuem Gegner verbunden." />
 	<param name="String_Host" value="Server" />
+	<param name="String_Port" value="Port" />
 	<param name="String_PlayerName" value="Spielername" />
 	<param name="String_Set" value="Einstellen" />
 	<param name="String_PlayerNameSet" value="Spielername eingestellt" />
@@ -108,6 +91,8 @@
 	<param name="String_Computer" value="Computer" />
 	<param name="String_BotStarted" value="Bot gestartet." />
 	<param name="String_BotStopped" value="Bot angehalten." />
+	<param name="String_NoServer" value="Bitte gib einen Server ein." />
+	<param name="String_InvalidPort" value="Bitte gib einen gültigen Port ein." />
 	<param name="String_ServerStarting" value="Starte BattleShips Server V{0} auf Port {1}" />
 	<param name="String_ServerStopping" value="BattleShips Server wird angehalten" />
 	<param name="String_WebServerStarting" value="Starte Webserver auf Port {0}" />
@@ -130,6 +115,4 @@
 	<param name="String_EnterPlayerName" value="Bitte Spielernamen eingeben." />
 	<param name="String_Configuration" value="Konfiguration:" />
 	<param name="String_GameResult" value="Spielergebnis:" />
-</applet>
-</body>
-</html>
+</config>

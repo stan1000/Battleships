@@ -1,18 +1,4 @@
-<HTML>
-<HEAD>
-<TITLE>Battleships</TITLE>
-<script language="JavaScript" src="res/helpers.js"></script>
-</HEAD>
-<BODY marginwidth="0" marginheight="0" topmargin="0" leftmargin="0" bgcolor="#FFFFFF" onLoad="startChange()">
-<applet
-	archive="BattleShips.jar"
-	code="BattleShipsApplet.java"
-	width="1600"
-	height="1200"
-	name="BattleShipsApplet">
-
-	<param name="Port" value="443" />			<!-- Client TCP port; use server.xml for Server now -->
-	
+<config>
 	<!-- Convenience settings for the application -->
 	<param name="PlaySound" value="0" />		<!-- Sound on/off -->
 	<param name="RestoreWindow" value="1" />	<!-- Restore minimized window when a client connects -->
@@ -80,6 +66,7 @@
 	<param name="String_EnemyLeft" value="The opponent has left the game." />
 	<param name="String_NewEnemy" value="Connected to new opponent." />
 	<param name="String_Host" value="Server" />
+	<param name="String_Port" value="Port" />
 	<param name="String_PlayerName" value="Player name" />
 	<param name="String_Set" value="Set" />
 	<param name="String_PlayerNameSet" value="Player name set to" />
@@ -98,6 +85,8 @@
 	<param name="String_Computer" value="Computer" />
 	<param name="String_BotStarted" value="Bot started." />
 	<param name="String_BotStopped" value="Bot stopped." />
+	<param name="String_NoServer" value="Please supply a server." />
+	<param name="String_InvalidPort" value="Please supply a valid port." />
 	
 	<param name="String_ServerStarting" value="Starting BattleShips Server V{0} on port {1}" />
 	<param name="String_ServerStopping" value="Stopping BattleShips Server" />
@@ -121,9 +110,4 @@
 	<param name="String_EnterPlayerName" value="Please enter a player name." />
 	<param name="String_Configuration" value="Configuration:" />
 	<param name="String_GameResult" value="Game result:" />
-
-	BattleShips Applet
-</applet>
-<br>BattleShips Applet
-</BODY>
-</HTML>
+</config>

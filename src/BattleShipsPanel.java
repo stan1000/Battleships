@@ -51,6 +51,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private Container m_oPnlClient;
 	private GfxAnimatedButton m_oBtnToggleConnect;
 	private TextField m_oTxtServer;
+	private TextField m_txtPort;
 	private GfxAnimatedButton m_oBtnToggleServer;
 	private int m_mode;
 	private BattleShipsConnection m_oSchSocket;
@@ -64,7 +65,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_bMyTurn;
 	private int m_iCellWidth;
 	private int m_iFieldWidth;
-	private int m_iPort;
 	private int m_iServerPort;
 	private boolean m_bShipsHidden;
 	private AudioClip m_oAuGameStart;
@@ -99,6 +99,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private BattleShipsParentContainer m_oBspcParent;
 	private boolean m_bHaveServerError;
 	private TextDisplayPanel m_lblHost;
+	private TextDisplayPanel m_lblPort;
 	private TextDisplayPanel m_lblPlayerName;
 	private Container m_pnlPlayerName;
 	private TextField m_txtPlayerName;
@@ -163,7 +164,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		GfxAnimatedButton btnOk;
 		GfxAnimatedButton btnCancel;
 		int xLoc;
-		int statePanelFontSize;
+		int port;
 		
 		setLayout(null);
 		setBackground(Color.white);
@@ -190,10 +191,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		// get external config parms
 		m_iCellWidth = parseIntParm("CellWidth", DEFAULT_CELL_WIDTH);
 		m_iFieldWidth = parseIntParm("FieldWidth", DEFAULT_FIELD_WIDTH);
-		m_iPort = parseIntParm("Port", 1000);
-		if (m_iPort < 1 || m_iPort > 65535) m_iPort = 1000;
-		m_iServerPort = parseIntParm("ServerPort", 1000);
-		if (m_iServerPort < 1 || m_iServerPort > 65535) m_iServerPort = 1000;
+		port = parseIntParm("Port", 666, true);
+		if (port < 1 || port > 65535) port = 666;
+		m_iServerPort = parseIntParm("ServerPort", 666);
+		if (m_iServerPort < 1 || m_iServerPort > 65535) m_iServerPort = 666;
 		m_bPlaySound = (parseIntParm("PlaySound", 0, true) == 1 ? true : false);
 		bRestoreWindow = (parseIntParm("RestoreWindow", 0, true) == 1 ? true : false);
 		bUseLocalConfig = (parseIntParm("UseLocalConfig", 0) == 1 ? true : false);
@@ -297,10 +298,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_cntModalMask.addMouseListener(new TheMouseAdapter((Object)this, "dummy"));
 		m_cntModalMask.setVisible(false);
 		
-		statePanelFontSize = (int)Math.round(m_iCellWidth * m_iFieldWidth / 100d * 12.5d);
 		m_oCntState = (StateDisplayPanel)m_oCntMain.add(new StateDisplayPanel());
 		m_oCntState.setBackground(Color.white);
-		m_oCntState.setFont(new Font("SansSerif", Font.BOLD, statePanelFontSize));
 		m_oCntState.setBounds(1, 1, 1, 1);
 		m_oCntState.setVisible(false);
 
@@ -448,11 +447,19 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oTxtServer = (TextField)m_oPnlClient.add(new TextField(getHost()));
 		m_oTxtServer.setFont(oFntChat);
 		m_oTxtServer.addKeyListener(new TheKeyAdapter((Object)this, "r"));
-		
+
+		m_txtPort = (TextField)m_oPnlClient.add(new TextFieldWithLimit(Integer.toString(port), 5, 5));
+		m_txtPort.setFont(oFntChat);
+
 		m_lblHost = (TextDisplayPanel)m_oPnlClient.add(new TextDisplayPanel());
 		m_lblHost.setFont(oFntMainFont);
 		m_lblHost.setText(getString("Host"), TextDisplayPanel.AUTO_RESIZE);
 		m_lblHost.setLocation(0, -2);
+
+		m_lblPort = (TextDisplayPanel)m_oPnlClient.add(new TextDisplayPanel());
+		m_lblPort.setFont(oFntMainFont);
+		m_lblPort.setText(getString("Port"), TextDisplayPanel.AUTO_RESIZE);
+		m_lblPort.setLocation(151, -2);
 
 		//**m_oBtnToggleConnect = (GfxAnimatedButton)m_oPnlClient.add(new GfxAnimatedButton((Object)this, "BtnToggleConnect", oImgBtnOn, oImgBtnOff));
 		m_oBtnToggleConnect = (GfxAnimatedButton)m_oPnlClient.add(new GfxAnimatedButton((Object)this, "q", oImgBtnOn, oImgBtnOff));
@@ -601,7 +608,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		if (infoCellWidth < 14)
 			infoCellWidth = 14;
 		int scoreFieldHeight = 28; //old 21 - recalc all number :-(((
-		
+		int statePanelFontSize = (int)Math.round(m_iCellWidth * m_iFieldWidth / 100d * 12.5d);
 		
 		oImgShipSegment = buildShipSegment(m_oColShip, m_iCellWidth);
 		oImgShipSegmentSunk = buildShipSegment(m_oColShipSunk, m_iCellWidth);
@@ -632,6 +639,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			m_oCbServer.setEnabled(false);
 			m_cbComputer.setEnabled(false);
 			m_oTxtServer.setEnabled(false);
+			m_txtPort.setEnabled(false);
 			m_oBtnToggleConnect.setEnabled(false);
 			m_oBtnToggleServer.setEnabled(false);
 			m_oBtnToggleHideShips.setEnabled(false);
@@ -676,8 +684,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_oCbClient.setSize(m_oFntMetrMain.stringWidth(m_oCbClient.getLabel()) + 20, iFontHeight);
 		m_oCbServer.setSize(m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 20, iFontHeight);
 		m_cbComputer.setSize(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 20, iFontHeight);
-		m_oTxtServer.setBounds(0, iFontHeight - 2, 170, iFontHeightChat);
-		m_oBtnToggleConnect.setLocation(171, iFontHeight - 2);
+		m_oTxtServer.setBounds(0, iFontHeight - 2, 150, iFontHeightChat);
+		m_txtPort.setBounds(151, iFontHeight - 2, 35, iFontHeightChat);
+		m_oBtnToggleConnect.setLocation(187, iFontHeight - 2);
 		m_oBtnToggleConnect.setSize(m_oBtnToggleConnect.getSize().width, iFontHeightChat - 1);
 		m_oPnlClient.setBounds(m_oFntMetrMain.stringWidth(m_cbComputer.getLabel()) + 25, 0, iFieldDim * 2 + 15 - (m_oFntMetrMain.stringWidth(m_oCbServer.getLabel()) + 30), iFontHeightChat * 2);
 		//m_oPnlClient.setBackground(Color.green);
@@ -692,6 +701,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_cntSelectEnemy.setLocation(2 * iFieldDim + HORIZ_BORDER_PADDING * 2 - m_cntSelectEnemy.getSize().width - 5, iFieldDim + VERT_BORDER_PADDING + 19 - m_cntSelectEnemy.getSize().height - 5);
 		//m_cntSelectEnemy.setVisible(true);
 		m_cntConfirmation.setLocation((2 * iFieldDim + HORIZ_BORDER_PADDING + 30) / 2 - m_cntConfirmation.getSize().width / 2, VERT_BORDER_PADDING + iFieldDim / 2 - m_cntConfirmation.getSize().height / 2);
+		m_oCntState.setFont(new Font("SansSerif", Font.BOLD, statePanelFontSize));
 		if (m_bClientOnly) {
 			m_oCbClient.setVisible(false);
 			m_oCbServer.setVisible(false);
@@ -700,7 +710,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			m_oBtnToggleServer.setVisible(false);
 			m_oBtnToggleConnect.setVisible(false);
 			m_oTxtServer.setVisible(false);
+			m_txtPort.setVisible(false);
 			m_lblHost.setVisible(false);
+			m_lblPort.setVisible(false);
 			m_oPnlClient.setVisible(true);
 		}
 		return bRet;
@@ -1106,7 +1118,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				setScore();
 				setScoreBounds();
 				setServerPlayerName();
-				if (!m_bClientOnly) setCookie("ServerName", m_oTxtServer.getText());
+				if (!m_bClientOnly) {
+					setCookie("ServerName", m_oTxtServer.getText());
+					setCookie("Port", m_txtPort.getText());
+				}
 				if (m_mode != BattleShipsUtility.MODE_CLIENT) {
 					if (!m_bClientOnly && m_oCbRestoreWindow.getState()) setNormalState();
 					if (m_mode != BattleShipsUtility.MODE_COMPUTER && m_bPlaySound) playAudioClip(m_oAuConnect);
@@ -1328,7 +1343,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private void stopConnect() {
 		reset();
 		if (m_connWithDedicatedServer) m_oBspcParent.setWindowTitle("");
-		m_oSchSocket.interrupt();
+		if (m_oSchSocket != null) m_oSchSocket.interrupt();
 		m_oBtnReady.setEnabled(false);
 		m_oTxtChatInput.setEnabled(false);
 		m_oLblScore.setVisible(false);
@@ -1344,6 +1359,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_oCbServer.setEnabled(true);
 				m_cbComputer.setEnabled(true);
 				m_oTxtServer.setEnabled(true);
+				m_txtPort.setEnabled(true);
 				m_cntSelectEnemy.setVisible(false);
 				m_btnSetPlayerName.setEnabled(false);
 				m_txtPlayerName.setEnabled(true);
@@ -1721,17 +1737,41 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	public void connect() {
 		//**m_oSchSocket = new BattleShipsConnection((Object)this, "SckBattleShip");
-		setStatus(getString("Connecting"));
-		m_oSchSocket = new BattleShipsConnection((BattleShipsConnectionListener)this);
-		m_oSchSocket.setMessageQualifier("msg");
-		m_oSchSocket.start(m_oTxtServer.getText(), m_iPort);
-		if (!m_bClientOnly)
-			setButtonLabelAndSize(m_oBtnToggleConnect, getString("Disconnect"), false);
-		m_bConnected = true;
-		m_oCbClient.setEnabled(false);
-		m_oCbServer.setEnabled(false);
-		m_cbComputer.setEnabled(false);
-		m_oTxtServer.setEnabled(false);
+		int port;
+		String server;
+		boolean invalidPort = false;
+		boolean invalidServer = false;
+		server = m_oTxtServer.getText();
+		if (!server.equals("")) {
+			try {
+				port = Integer.parseInt(m_txtPort.getText());
+				if (port >= 1 && port <= 65535) {
+					setStatus(getString("Connecting"));
+					m_oSchSocket = new BattleShipsConnection((BattleShipsConnectionListener)this);
+					m_oSchSocket.setMessageQualifier("msg");
+					m_oSchSocket.start(server, port);
+					if (!m_bClientOnly)
+						setButtonLabelAndSize(m_oBtnToggleConnect, getString("Disconnect"), false);
+					m_bConnected = true;
+					m_oCbClient.setEnabled(false);
+					m_oCbServer.setEnabled(false);
+					m_cbComputer.setEnabled(false);
+					m_oTxtServer.setEnabled(false);
+					m_txtPort.setEnabled(false);
+				} else {
+					invalidPort = true;
+				}
+			} catch (NumberFormatException e) {
+				invalidPort = true;
+			}
+		} else {
+			invalidServer = true;
+		}
+		if (invalidServer) {
+			socketError("General", getString("NoServer"));
+		} else if (invalidPort) {
+			socketError("General", getString("InvalidPort"));
+		}
 	}
 	
 	private void playAudioClip(AudioClip oAudioClip) {

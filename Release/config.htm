@@ -1,21 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-<title>Battleships</title>
-<script type="text/javascript" src="webres/helpers.js"></script>
-<link rel="stylesheet" type="text/css" href="webres/style.css" />
-</head>
-<body onload="startChange()">
-<applet
-	archive="BattleShips.jar"
-	code="BattleShipsApplet.java"
-	width="1600"
-	height="1200"
-	name="BattleShipsApplet">
-	
-	<param name="Port" value="443" />			<!-- Client TCP port; use server.cfg for server now - 
-												both settings must match so connecting applets work -->
-
+<config>
 	<!-- Convenience settings for the application -->
 	<param name="PlaySound" value="1" />		<!-- Sound on/off -->
 	<param name="RestoreWindow" value="1" />	<!-- Restore minimized window when a client connects -->
@@ -89,6 +72,7 @@
 	<param name="String_EnemyLeft" value="The opponent has left the game." />
 	<param name="String_NewEnemy" value="Connected to new opponent." />
 	<param name="String_Host" value="Server" />
+	<param name="String_Port" value="Port" />
 	<param name="String_PlayerName" value="Player name" />
 	<param name="String_Set" value="Set" />
 	<param name="String_PlayerNameSet" value="Player name set to" />
@@ -107,6 +91,8 @@
 	<param name="String_Computer" value="Computer" />
 	<param name="String_BotStarted" value="Bot started." />
 	<param name="String_BotStopped" value="Bot stopped." />
+	<param name="String_NoServer" value="Please supply a server." />
+	<param name="String_InvalidPort" value="Please supply a valid port." />
 	<param name="String_ServerStarting" value="Starting BattleShips Server V{0} on port {1}" />
 	<param name="String_ServerStopping" value="Stopping BattleShips Server" />
 	<param name="String_WebServerStarting" value="Starting webserver on port {0}" />
@@ -129,6 +115,4 @@
 	<param name="String_EnterPlayerName" value="Please enter a player name." />
 	<param name="String_Configuration" value="Configuration:" />
 	<param name="String_GameResult" value="Game result:" />
-</applet>
-</body>
-</html>
+</config>
