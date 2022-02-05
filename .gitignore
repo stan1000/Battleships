@@ -217,3 +217,16 @@ pip-log.txt
 .mr.developer.cfg
 *.class
 src/cookies.txt
+token.txt
+TODO-console.psp
+TODO-field.psp
+src/server_lot.cfg
+src/BattleShipsBotRasp.bat
+src/BattleShipsAutoBot.bat
+src/server.cfg
+src/server_normal.cfg
+Ideas.txt
+src/BattleShipsServerApplication.exe
+BattleShips.zip
+src/config-de.htm
+src/server_war.cfg
