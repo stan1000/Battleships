@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -95,7 +94,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		return (m_serverName == null ? DEFAULT_SERVER : m_serverName);
 	}
 	
-	public AudioClip getAudioClip(String sFileName) {
+	public URL getAudioClipUrl(String sFileName) {
 		return null;
 	}
 	

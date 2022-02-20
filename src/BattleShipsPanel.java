@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -67,13 +66,14 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private int m_iFieldWidth;
 	private int m_iServerPort;
 	private boolean m_bShipsHidden;
-	private AudioClip m_oAuGameStart;
-	private AudioClip m_oAuShipHit;
-	private AudioClip m_oAuShipSink;
-	private AudioClip m_oAuGameWon;
-	private AudioClip m_oAuGameLost;
-	private AudioClip m_oAuConnect;
-	private AudioClip m_oAuGameOver;
+	private AudioClipPlayer m_acpGameSounds;
+	private AudioClipPath m_oAuGameStart;
+	private AudioClipPath m_oAuShipHit;
+	private AudioClipPath m_oAuShipSink;
+	private AudioClipPath m_oAuGameWon;
+	private AudioClipPath m_oAuGameLost;
+	private AudioClipPath m_oAuConnect;
+	private AudioClipPath m_oAuGameOver;
 	private Image m_ImgOffScreenBuffer;
 	private boolean m_bPlaySound;
 	private TheTimerTask m_oTmrGameOver;
@@ -483,12 +483,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		//**m_oCbRestoreWindow.addMouseListener(new TheMouseAdapter((Object)this, "CbRestoreWindow"));
 		m_oCbRestoreWindow.addMouseListener(new TheMouseAdapter((Object)this, "rw"));
 		
-		m_oAuGameStart = getAudioClip("res/game_start.au");
-		m_oAuShipHit = getAudioClip("res/ship_hit.au");
-		m_oAuShipSink = getAudioClip("res/ship_sink.au");
-		m_oAuGameWon = getAudioClip("res/game_won.au");
-		m_oAuGameLost = getAudioClip("res/game_lost.au");
-		m_oAuConnect = getAudioClip("res/connect.au");
 		m_oCryptUtil = new CryptUtil();
 
 		m_pnlPlayerName = (Container)m_oPnlClient.add(new Container());
@@ -528,6 +522,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		}
 		setMode(m_mode, false);
 		//m_btnDisconnectEnemy.setText(getString("DisconnectEnemy"), TextDisplayPanel.AUTO_RESIZE);
+		initAudioSystem();
 		
 		if (m_bClientOnly && !bUseLocalConfig) {
 			m_mode = BattleShipsUtility.MODE_CLIENT;
@@ -552,6 +547,22 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				}
 			}
 		}
+	}
+	
+	private void initAudioSystem() {
+		m_acpGameSounds = new AudioClipPlayer(m_debug);
+		m_oAuGameStart = getAudioClipPath("res/game_start");
+		m_acpGameSounds.loadAudioClip(m_oAuGameStart);
+		m_oAuShipHit = getAudioClipPath("res/ship_hit");
+		m_acpGameSounds.loadAudioClip(m_oAuShipHit);
+		m_oAuShipSink = getAudioClipPath("res/ship_sink");
+		m_acpGameSounds.loadAudioClip(m_oAuShipSink);
+		m_oAuGameWon = getAudioClipPath("res/game_won");
+		m_acpGameSounds.loadAudioClip(m_oAuGameWon);
+		m_oAuGameLost = getAudioClipPath("res/game_lost");
+		m_acpGameSounds.loadAudioClip(m_oAuGameLost);
+		m_oAuConnect = getAudioClipPath("res/connect");
+		m_acpGameSounds.loadAudioClip(m_oAuConnect);
 	}
 	
 	public void stop() {
@@ -987,8 +998,20 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		return m_oBspcParent.getHost();
 	}
 	
-	private AudioClip getAudioClip(String sFileName) {
-		return m_oBspcParent.getAudioClip(sFileName);
+	private AudioClipPath getAudioClipPath(String sFileName) {
+		AudioClipPath path = new AudioClipPath();
+		URL url;
+		String fullName;
+
+		fullName = sFileName + ".wav";
+		url = m_oBspcParent.getAudioClipUrl(fullName);
+		path.setUrl(url);
+		
+		fullName = sFileName + ".au";
+		url = m_oBspcParent.getAudioClipUrl(fullName);
+		path.setFallbackUrl(url);
+		
+		return path;
 	}
 	
 	private Image getImage(String sFileName) {
@@ -1782,11 +1805,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		}
 	}
 	
-	private void playAudioClip(AudioClip oAudioClip) {
-		if (oAudioClip != null) {
-			AudioClipThread oAudThr = new AudioClipThread(oAudioClip);
-			oAudThr.start();
-		}
+	private void playAudioClip(AudioClipPath path) {
+		m_acpGameSounds.playAudioClip(path);
 	}
 	
 	private void setButtonLabelAndSize(GfxAnimatedButton oButton, String sLabel, boolean bRightAligned) {

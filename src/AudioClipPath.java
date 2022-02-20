@@ -18,29 +18,27 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import java.awt.*;
 import java.net.*;
 
-public interface BattleShipsParentContainer {
+public class AudioClipPath {
 	
-	public String getParameter(String sName, String sDefaultValue);
-
-	public String getParameter(String sName);
-
-	public String getHost();
-
-	public URL getAudioClipUrl(String sFileName);
-
-	public Image getImage(String sFileName);
+	private URL m_url;
+	private URL m_fallbackUrl;
 	
-	public void setNormalState();
+	public void setUrl(URL url) {
+		m_url = url;
+	}
 	
-	public String getCookie(String cookieName);
-							
-	public String getCookie(String cookieName, String defaultValue);
-							
-	public void setCookie(String cookieName, String value, int expDays);
+	public void setFallbackUrl(URL url) {
+		m_fallbackUrl = url;
+	}
 	
-	public void setWindowTitle(String title);
+	public URL getUrl() {
+		return m_url;
+	}
 
+	public URL getFallbackUrl() {
+		return m_fallbackUrl;
+	}
+	
 }

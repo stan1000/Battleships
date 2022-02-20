@@ -18,18 +18,46 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import java.applet.*;
+import java.net.*;
+import javax.sound.sampled.*;
 
 public class AudioClipThread extends Thread {
 	
-	private AudioClip m_oAudioClip;
+	private Clip m_clip;
+	private boolean m_running;
 	
-	public AudioClipThread(AudioClip oAudioClip) {
-		m_oAudioClip = oAudioClip;
+	public AudioClipThread(Clip clip) {
+		m_clip = clip;
+	}
+
+	public void start() {
+		if (!m_running) {
+			m_running = true;
+			super.start();
+		}
 	}
 	
 	public void run() {
-		m_oAudioClip.play();
+		m_clip.start();
+		while (m_running) {
+			if (!m_clip.isActive()) {
+				interrupt();
+			}
+			try {
+				sleep(100);
+			} catch (InterruptedException e) {
+				interrupt();
+				break;
+			}
+		}
 	}
+
+	public void interrupt() {
+		if (m_running) {
+			super.interrupt();
+			m_running = false;
+		}
+	}
+
 	
-}
+}

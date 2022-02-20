@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -85,14 +84,9 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 		return m_serverName;
 	}
 	
-	public AudioClip getAudioClip(String sFileName) {
-		AudioClip oAcClip = null;
-		URL oURL = getResource(sFileName);
-		if (oURL != null) {
-		    oAcClip = Applet.newAudioClip(oURL);
-			//System.out.println("Loaded clip: " + oURL.toString());
-		}
-		return oAcClip;
+	public URL getAudioClipUrl(String sFileName) {
+		URL url = getResource(sFileName);
+		return url;
 	}
 	
 	public Image getImage(String sFileName) {
