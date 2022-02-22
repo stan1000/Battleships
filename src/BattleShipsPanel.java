@@ -551,17 +551,17 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	
 	private void initAudioSystem() {
 		m_acpGameSounds = new AudioClipPlayer(m_debug);
-		m_oAuGameStart = getAudioClipPath("res/game_start");
+		m_oAuGameStart = getAudioClipPath("snd/game_start");
 		m_acpGameSounds.loadAudioClip(m_oAuGameStart);
-		m_oAuShipHit = getAudioClipPath("res/ship_hit");
+		m_oAuShipHit = getAudioClipPath("snd/ship_hit");
 		m_acpGameSounds.loadAudioClip(m_oAuShipHit);
-		m_oAuShipSink = getAudioClipPath("res/ship_sink");
+		m_oAuShipSink = getAudioClipPath("snd/ship_sink");
 		m_acpGameSounds.loadAudioClip(m_oAuShipSink);
-		m_oAuGameWon = getAudioClipPath("res/game_won");
+		m_oAuGameWon = getAudioClipPath("snd/game_won");
 		m_acpGameSounds.loadAudioClip(m_oAuGameWon);
-		m_oAuGameLost = getAudioClipPath("res/game_lost");
+		m_oAuGameLost = getAudioClipPath("snd/game_lost");
 		m_acpGameSounds.loadAudioClip(m_oAuGameLost);
-		m_oAuConnect = getAudioClipPath("res/connect");
+		m_oAuConnect = getAudioClipPath("snd/connect");
 		m_acpGameSounds.loadAudioClip(m_oAuConnect);
 	}
 	

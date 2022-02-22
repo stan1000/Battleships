@@ -85,7 +85,13 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 	}
 	
 	public URL getAudioClipUrl(String sFileName) {
-		URL url = getResource(sFileName);
+		URL url = null;
+		File file = new File(sFileName);
+		try {
+			url = file.toURI().toURL();
+		} catch (MalformedURLException e) {
+			System.err.println("Error: Problem with sound file: " + file.toString());
+		}
 		return url;
 	}
 	
