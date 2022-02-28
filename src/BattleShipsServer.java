@@ -41,6 +41,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 	private BattleShipsUtility m_oUtil;
 	private PrintWriter m_bwLog;
 	private Hashtable<String, String> m_htPlayerName;
+	private int m_currentDayOfYear;
 
 	private final boolean DEBUG = false;
 
@@ -50,6 +51,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 
 		m_bwLog = bwLog;
 		m_oUtil = new BattleShipsUtility();
+		m_currentDayOfYear = 0;
 		if (!serverConfigFile.equals("")) {
 			m_oUtil.setServerConfigFile(serverConfigFile);
 		}
@@ -73,7 +75,6 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 	
 	public void start() {
 		if (!m_bRunning) {
-			log(new Date().toString());
 			try {
 				m_oServerSocketThread = new ServerSocketThread(this, m_iPort);
 				m_oHtBattleShipsConnection = new Hashtable<String, BattleShipsConnection>();
@@ -259,7 +260,7 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 		}
 		oSchSocket.interrupt();
 		broadcastClientList();
-		ret = getString("Disconnected2") + " " + sSocketIdentifier;
+		ret = getString("Disconnected2") + " " + sSocketIdentifier + " (" + playerName + ")";
 		log(ret);
 		return ret;
 	}
@@ -391,7 +392,14 @@ public class BattleShipsServer extends Thread implements BattleShipsConnectionLi
 	}
 	
 	private void log(String sMsg) {
-		m_bwLog.println(BattleShipsUtility.getTimeStamp() + " - " + sMsg);
+		Calendar cal = Calendar.getInstance();
+		int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+
+		if (m_currentDayOfYear != dayOfYear) {
+			m_bwLog.println(BattleShipsUtility.getTimeStamp(cal) + " - " + (new Date().toString()));
+			m_currentDayOfYear = dayOfYear;
+		}
+		m_bwLog.println(BattleShipsUtility.getTimeStamp(cal) + " - " + sMsg);
 		//sendLogToAdmins(sTimeStamp + " - " + sMsg);
 	}
 	

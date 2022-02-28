@@ -214,7 +214,8 @@ public class HttpRequestThread extends Thread {
 	}
 	
 	private void log(int iStatus, String sRemoteAddress, String sRequest, String sReferrer) {
-		m_oLogPrintWriter.println(BattleShipsUtility.getTimeStamp() + " " + iStatus + " " + 
+		Calendar cal = Calendar.getInstance();
+		m_oLogPrintWriter.println(BattleShipsUtility.getTimeStamp(cal) + " " + iStatus + " " + 
 							sRemoteAddress + " " + sRequest + " " + sReferrer);
 		m_oLogPrintWriter.flush();
 	}

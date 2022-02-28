@@ -122,9 +122,8 @@ public class BattleShipsUtility {
 		return "Schiffe Versenken (Battleships) V" + VERSION + "\n\u00a9 2005-2022 Stan Holoubek\nhttp://www.stans-world.de/battleships.html";
 	}
 	
-	public static String getTimeStamp() {
+	public static String getTimeStamp(Calendar cal) {
 		String sTimeStamp;
-		Calendar cal = Calendar.getInstance();
 		
 		sTimeStamp = getZeroed(cal.get(Calendar.HOUR_OF_DAY)) + ":" + getZeroed(cal.get(Calendar.MINUTE)) + ":" +
 						   getZeroed(cal.get(Calendar.SECOND));
