@@ -825,6 +825,9 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				sendMessage("shoot", oPoint.x + ";" + oPoint.y);
 				sendMessage("gameresult", m_oPntScore.x + ";" + m_oPntScore.y);
 			}
+			if (m_isBot) {
+				//System.out.println("Percent left: " + m_Ai.getShotsLeftPercent());
+			}
 		} else {
 			setStatus(sStatus);
 			if (!bHit) {

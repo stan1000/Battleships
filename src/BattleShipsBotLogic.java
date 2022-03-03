@@ -40,7 +40,7 @@ public class BattleShipsBotLogic {
 	private boolean m_debug;
 	
 	public static final int BOT_DELAY = 200;
-	private static final double EDGE_SHOT_PROBABILITY = 0.2d;
+	private static final double EDGE_SHOT_PROBABILITY = 0.4d;
 		
 	public BattleShipsBotLogic(int fieldWidth, boolean debug) {
 		m_totalShotPoints = new ArrayList<Point>();
@@ -291,7 +291,7 @@ public class BattleShipsBotLogic {
 		//printDebug("Shot result: " + shot.x + " - " + shot.y + " - " + hit + " - " + sunk);
 	}
 
-	private int getShotsLeftPercent() {
+	public int getShotsLeftPercent() {
 		return (int)Math.round((double)m_totalShotPoints.size() / (double)(m_fieldWidth * m_fieldWidth) * 100d);
 	}
 	
@@ -678,7 +678,7 @@ public class BattleShipsBotLogic {
 
 		printDebug("Ship Percentage Left: " + shipPercent);
 
-		if (percent < 50 && shipPercent > 20 || percent < 40) {
+		if (percent < 60 && shipPercent > 20 || percent < 50) {
 			m_seekEdges = true;
 		}
 		
