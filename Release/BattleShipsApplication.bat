@@ -1,1 +1,1 @@
-java -cp BattleShips.jar BattleShipsApplication -debug
+java -cp BattleShips.jar BattleShipsApplication
