@@ -63,6 +63,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 			m_oBtlShips = (BattleShipsPanel)add(new BattleShipsPanel(false, debug));
 			setVisible(true);
 			setSize(640, 480);
+			setIcons();
 			m_oBtlShips.setStartBot(startBot);
 			m_oBtlShips.setStartServer(startServer);
 			m_oBtlShips.init();
@@ -106,6 +107,13 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 			System.exit(1);
 		}
 		return oImg;
+	}
+	
+	private void setIcons() {
+		ArrayList<Image> iconList = new ArrayList<Image>();
+		iconList.add(getImage("res/icon16x16.png"));
+		iconList.add(getImage("res/icon32x32.png"));
+		setIconImages(iconList);
 	}
 	
 	private URL getResource(String fileName) {
