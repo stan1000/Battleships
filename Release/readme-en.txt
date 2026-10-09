@@ -87,6 +87,8 @@ Command-line parameters:
 	hide the bot UI; Note: in difference to the dedicated server, the bot is still a UI application and only works when a GUI is present - something to consider on small footprint Linux-based servers, like e.g. the Raspberry Pi
 -timeout <seconds>
 	Time of inactivity after which the bot will disconnect when connected to a player on a dedicated server; default: 600
+-configfile <name>
+	To use a different config file other than the default server.cfg
 
 Localization
 ====================

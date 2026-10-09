@@ -27,7 +27,7 @@ public class BattleShipsBotLogic {
 	private ArrayList<Point> m_totalShotPoints;
 	private ArrayList<Point> m_hitPoints;
 	private ArrayList<BotShot> m_surrShotPoints;
-	private ArrayList<Point> m_rowShotPoints;
+	private ArrayList<Point> m_shotPoints;
 	private ArrayList<Point> m_totalHitPoints;
 	private Point m_firstPoint;
 	private Point m_lastHitPoint;
@@ -46,7 +46,7 @@ public class BattleShipsBotLogic {
 		m_totalShotPoints = new ArrayList<Point>();
 		m_hitPoints = new ArrayList<Point>();
 		m_surrShotPoints = new ArrayList<BotShot>();
-		m_rowShotPoints = new ArrayList<Point>();
+		m_shotPoints = new ArrayList<Point>();
 		m_totalHitPoints = new ArrayList<Point>();
 		m_fieldWidth = fieldWidth;
 		m_debug = debug;
@@ -55,14 +55,14 @@ public class BattleShipsBotLogic {
 		m_lastFiringSolution = new ArrayList<Point>();
 		m_seekEdges = false;
 		fillTotalShotPoints();
-		/*addRowShotPoint(new Point(12, 9));
-		addRowShotPoint(new Point(10, 10));
-		addRowShotPoint(new Point(9, 10));
-		addRowShotPoint(new Point(13, 11));
-		addRowShotPoint(new Point(9, 11));
-		addRowShotPoint(new Point(11, 12));
-		addRowShotPoint(new Point(12, 10));
-		addRowShotPoint(new Point(11, 10));*/
+		/*addShotPoint(new Point(12, 9));
+		addShotPoint(new Point(10, 10));
+		addShotPoint(new Point(9, 10));
+		addShotPoint(new Point(13, 11));
+		addShotPoint(new Point(9, 11));
+		addShotPoint(new Point(11, 12));
+		addShotPoint(new Point(12, 10));
+		addShotPoint(new Point(11, 10));*/
 	}
 	
 	public void setTestShipsPanel(BattleShipsField testShips) {
@@ -77,11 +77,11 @@ public class BattleShipsBotLogic {
 		Point pnt;
 		BotShot surrShot;
 		int index;
-		int size1 = m_rowShotPoints.size();
+		int size1 = m_shotPoints.size();
 		int size2 = m_surrShotPoints.size();
 		if (size1 > 0) {
-			pnt = m_rowShotPoints.get(size1 - 1);
-			m_rowShotPoints.remove(size1 - 1);
+			pnt = m_shotPoints.get(size1 - 1);
+			m_shotPoints.remove(size1 - 1);
 			removeSurrShotPoint(pnt);
 			m_totalShotPoints.remove(pnt);
 			printDebug("El count after 1: (" + pnt.toString() + ")" + m_totalShotPoints.size());
@@ -126,7 +126,7 @@ public class BattleShipsBotLogic {
 			}*/
 			size = m_hitPoints.size();
 			if (size > 0) {
-				m_rowShotPoints.clear();
+				m_shotPoints.clear();
 				m_surrShotPoints.clear();
 				m_firingSolutions.clear();
 				m_lastFiringSolution.clear();
@@ -139,7 +139,7 @@ public class BattleShipsBotLogic {
 			}
 		}
 		if (sunk && m_hitPoints.size() == 0) {
-			m_rowShotPoints.clear();
+			m_shotPoints.clear();
 			m_surrShotPoints.clear();
 			m_firingSolutions.clear();
 			m_lastFiringSolution.clear();
@@ -167,15 +167,15 @@ public class BattleShipsBotLogic {
 				if (!sunk) {
 					if (m_hitPoints.size() == 3 && !m_lastFiringSolution.contains(m_lastShot) &&  
 						!m_plEnemyScore.hasActiveShips(4) && !m_plEnemyScore.hasActiveShips(6)) {
-							m_rowShotPoints.clear();
+							m_shotPoints.clear();
 					}
-					if (m_lastFiringSolution.contains(shot) && hit && m_rowShotPoints.size() == 0) {
+					if (m_lastFiringSolution.contains(shot) && hit && m_shotPoints.size() == 0) {
 						//printDebug("Looking for special ships (1-after sub): Battleship");
 						m_firingSolutions.clear();
 						manageFiringSolutions(5);
-					} else if (m_lastFiringSolution.contains(m_lastShot) && (!hit || m_rowShotPoints.size() == 0)) {
+					} else if (m_lastFiringSolution.contains(m_lastShot) && (!hit || m_shotPoints.size() == 0)) {
 						if (!hit) {
-							m_rowShotPoints.clear();
+							m_shotPoints.clear();
 						}
 						if (m_hitPoints.size() >= 3) {
 							m_firingSolutions.clear();
@@ -183,7 +183,7 @@ public class BattleShipsBotLogic {
 						applyFiringSolutionLogic("1");
 					}
 				}
-				if (m_rowShotPoints.size() == 0) {
+				if (m_shotPoints.size() == 0) {
 					if (!sunk) {
 						fillSurrShotPoints(shot, m_surrShotPoints);
 						printDebug("individual next shot point: " + shot.toString());
@@ -213,7 +213,7 @@ public class BattleShipsBotLogic {
 								}
 								for (i = pnt1.y; i <= pnt2.y; i++) {
 									pnt = new Point(pnt1.x, i);
-									boolean pa = addRowShotPoint(pnt);
+									boolean pa = addShotPoint(pnt);
 									pointAdded = (pointAdded || pa);
 								}
 								//printDebug("size > 1 (x): pass 1 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
@@ -229,7 +229,7 @@ public class BattleShipsBotLogic {
 								}
 								for (i = pnt1.x; i <= pnt2.x; i++) {
 									pnt = new Point(i, pnt1.y);
-									boolean pa = addRowShotPoint(pnt);
+									boolean pa = addShotPoint(pnt);
 									pointAdded = (pointAdded || pa);
 								}
 								//printDebug("size > 1 (y): pass 2 - " + pnt1.toString() + " - " + pnt2.toString() + " - Added: " + (pointAdded ? "true" : "false"));
@@ -246,7 +246,7 @@ public class BattleShipsBotLogic {
 								j = 0;
 								for (i = pnt1.x; i <= pnt2.x; i++) {
 									pnt = new Point(i, pnt1.y + j);
-									boolean pa = addRowShotPoint(pnt);
+									boolean pa = addShotPoint(pnt);
 									pointAdded = (pointAdded || pa);
 									j++;
 								}
@@ -264,7 +264,7 @@ public class BattleShipsBotLogic {
 								j = 0;
 								for (i = pnt1.x; i <= pnt2.x; i++) {
 									pnt = new Point(i, pnt1.y - j);
-									boolean pa = addRowShotPoint(pnt);
+									boolean pa = addShotPoint(pnt);
 									pointAdded = (pointAdded || pa);
 									j++;
 								}
@@ -284,7 +284,7 @@ public class BattleShipsBotLogic {
 					applyFiringSolutionLogic("3");
 				}
 				//m_lastHitPoint = null;
-				//m_rowShotPoints.clear();
+				//m_shotPoints.clear();
 			}
 				
 		}
@@ -341,8 +341,8 @@ public class BattleShipsBotLogic {
 				manageFiringSolutions(5);
 			}
 		}
-		//printDebug("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size() + " - m_rowShotPoints.size(): " + m_rowShotPoints.size());
-		if (m_rowShotPoints.size() == 0 && m_hitPoints.size() >= 3) {
+		//printDebug("Last firing solution: " + m_lastFiringSolution.toString() + " - hitpoints: " + m_hitPoints.size() + " - m_shotPoints.size(): " + m_shotPoints.size());
+		if (m_shotPoints.size() == 0 && m_hitPoints.size() >= 3) {
 			printDebug("Looking for special ships (" + debugMarker + "): Battleship");
 			manageFiringSolutions(5);
 		}
@@ -365,13 +365,13 @@ public class BattleShipsBotLogic {
 		Point pnt;
 		BotShot botShot;
 		
-		m_rowShotPoints.clear();
+		m_shotPoints.clear();
 		botShot = m_firingSolutions.remove(0);
 		firingSolution = botShot.getFiringSolution();
 		m_lastFiringSolution = firingSolution;
 		for (i = 0; i < firingSolution.size(); i++) {
 			pnt = firingSolution.get(i);
-			addRowShotPoint(pnt);
+			addShotPoint(pnt);
 		}
 	}
 	
@@ -579,13 +579,13 @@ public class BattleShipsBotLogic {
 		return shot;
 	}
 	
-	private boolean addRowShotPoint(Point pnt) {
+	private boolean addShotPoint(Point pnt) {
 		boolean pointAdded = false;
 
-		if (containsShotPoint(pnt)) {
-			m_rowShotPoints.add(pnt);
+		if (containsShotPoint(pnt) && !checkSurrHits(pnt, 1)) {
+			m_shotPoints.add(pnt);
 			pointAdded = true;
-			//printDebug("addRowShotPoint: " + pnt.toString());
+			//printDebug("addShotPoint: " + pnt.toString());
 		}
 		return pointAdded;
 	}

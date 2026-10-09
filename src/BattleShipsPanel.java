@@ -68,7 +68,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_bShipsHidden;
 	private AudioClipPlayer m_acpGameSounds;
 	private AudioClipPath m_oAuGameStart;
-	private AudioClipPath m_oAuShipHit;
+	private AudioClipPath m_oAuShipHitMe;
+	private AudioClipPath m_oAuShipHitEnemy;
 	private AudioClipPath m_oAuShipSink;
 	private AudioClipPath m_oAuGameWon;
 	private AudioClipPath m_oAuGameLost;
@@ -127,6 +128,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private boolean m_startServer;
 	private BotThread m_botThread;
 	private int m_botPort;
+	private int m_botDelay;
+	private String m_serverConfigFile;
 	
 	private final int HORIZ_BORDER_PADDING = 15;
 	private final int VERT_BORDER_PADDING = 8;
@@ -141,6 +144,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_startBot = false;
 		m_startServer = false;
 		m_botPort = 0;
+		m_serverConfigFile = "";
 	}
 	
 	public void init() {
@@ -229,6 +233,8 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_bWebServerLog = (parseIntParm("WebServerLog", 0) == 1 ? true : false);
 		m_iWebServerPort = parseIntParm("WebServerPort", 80);
 		if (m_iWebServerPort < 1 || m_iWebServerPort > 65535 || m_iWebServerPort == m_iServerPort) m_iWebServerPort = 80;
+		m_botDelay = parseIntParm("BotDelay", 200);
+		System.out.println("BotDelay: "  + m_botDelay);
 		
 		oFntMainFont = new Font("SansSerif", Font.PLAIN, 14);
 		fntMainFontBold = new Font("SansSerif", Font.BOLD, 14);
@@ -553,8 +559,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_acpGameSounds = new AudioClipPlayer(m_debug);
 		m_oAuGameStart = getAudioClipPath("snd/game_start");
 		m_acpGameSounds.loadAudioClip(m_oAuGameStart);
-		m_oAuShipHit = getAudioClipPath("snd/ship_hit");
-		m_acpGameSounds.loadAudioClip(m_oAuShipHit);
+		m_oAuShipHitMe = getAudioClipPath("snd/ship_hit_me");
+		m_acpGameSounds.loadAudioClip(m_oAuShipHitMe);
+		m_oAuShipHitEnemy = getAudioClipPath("snd/ship_hit_enemy");
+		m_acpGameSounds.loadAudioClip(m_oAuShipHitEnemy);
 		m_oAuShipSink = getAudioClipPath("snd/ship_sink");
 		m_acpGameSounds.loadAudioClip(m_oAuShipSink);
 		m_oAuGameWon = getAudioClipPath("snd/game_won");
@@ -754,6 +762,10 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_startServer = startServer;
 	}
 	
+	public void setServerConfigFile(String serverConfigFile) {
+		m_serverConfigFile = serverConfigFile;
+	}
+	
 	public void passShot(boolean bEnemy, Point oPoint, boolean bHit, boolean bSunk, int iType, boolean bWon, ArrayList<Point> fieldHits) {
 		String sStatus;
 		String sTmp;
@@ -772,7 +784,11 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 					}
 				}
 			} else if (bHit) {
-				playAudioClip(m_oAuShipHit);
+				if (bEnemy) {
+					playAudioClip(m_oAuShipHitEnemy);
+				} else {
+					playAudioClip(m_oAuShipHitMe);
+				}
 			}
 		}
 
@@ -868,7 +884,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private void shootBot() {
 		if (!m_botPaused) {
 			try {
-				Thread.sleep(BattleShipsBotLogic.BOT_DELAY);
+				Thread.sleep(m_botDelay);
 			} catch (InterruptedException e) {}
 			m_oPlEnemyShips.shoot(m_Ai.getNextShot());
 		}
@@ -1065,7 +1081,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 			}
 			if (m_isBot) {
 				try {
-					Thread.sleep(BattleShipsBotLogic.BOT_DELAY);
+					Thread.sleep(m_botDelay);
 				} catch (InterruptedException e) {}
 				setReady();
 			}
@@ -1436,7 +1452,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 				m_botPaused = false;
 				refreshTimeOut();
 			}
-			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, false);
+			Point oPntShips = m_oPlMyShips.getShipsIntersectionPoint(true, true);
 			if (oPntShips != null) {
 				String sStatus = MessageFormat.format(getString("ShipsIntersect"),
 										new Object[]{getString("BattleShipType" + oPntShips.x),
@@ -1840,7 +1856,7 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 	private class BotThread extends Thread {
 		
 		public void run() {
-			BattleShipsBot.main(new String[]{"-invisible", "-port", Integer.toString(m_botPort)});
+			BattleShipsBot.main(new String[]{"-invisible", "-port", Integer.toString(m_botPort), "-configfile", m_serverConfigFile});
 		}
 		
 	}
