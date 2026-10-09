@@ -234,7 +234,6 @@ public class BattleShipsPanel extends Container implements BattleShipsConnection
 		m_iWebServerPort = parseIntParm("WebServerPort", 80);
 		if (m_iWebServerPort < 1 || m_iWebServerPort > 65535 || m_iWebServerPort == m_iServerPort) m_iWebServerPort = 80;
 		m_botDelay = parseIntParm("BotDelay", 200);
-		System.out.println("BotDelay: "  + m_botDelay);
 		
 		oFntMainFont = new Font("SansSerif", Font.PLAIN, 14);
 		fntMainFontBold = new Font("SansSerif", Font.BOLD, 14);
