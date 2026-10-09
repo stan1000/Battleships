@@ -66,6 +66,7 @@ public class BattleShipsApplication extends Frame implements BattleShipsParentCo
 			setIcons();
 			m_oBtlShips.setStartBot(startBot);
 			m_oBtlShips.setStartServer(startServer);
+			m_oBtlShips.setServerConfigFile(serverConfigFile);
 			m_oBtlShips.init();
 		} else {
 			System.err.println(m_oUtil.getErrorMessage());

@@ -48,6 +48,7 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		boolean debug;
 		int timeOutSeconds;
 		int port;
+		String serverConfigFile;
 		
 		isVisible = !cliArgs.switchPresent("-invisible");
 		playerName = cliArgs.switchValue("-name", DEFAULT_PLAYER_NAME);
@@ -55,12 +56,16 @@ public class BattleShipsBot extends Frame implements BattleShipsParentContainer 
 		port = cliArgs.switchIntValue("-port", BattleShipsUtility.DEFAULT_PORT);
 		autoBot = cliArgs.switchPresent("-autobot");
 		debug = cliArgs.switchPresent("-debug");
+		serverConfigFile = cliArgs.switchValue("-configfile", "");
 		try {
 			timeOutSeconds =  cliArgs.switchIntValue("-timeout", DEFAULT_BOT_TIMEOUT_SECONDS);
 		} catch (NumberFormatException e) {
 			timeOutSeconds = DEFAULT_BOT_TIMEOUT_SECONDS;
 		}
 		m_oUtil = new BattleShipsUtility();
+		if (!serverConfigFile.equals("")) {
+			m_oUtil.setServerConfigFile(serverConfigFile);
+		}
 		m_cl = this.getClass().getClassLoader();
 		if (m_oUtil.readParameters()) {
 			setLayout(null);
